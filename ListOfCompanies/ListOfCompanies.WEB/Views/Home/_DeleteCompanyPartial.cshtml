@@ -1,0 +1,47 @@
+﻿@model ListOfCompanies.WEB.Models.DeleteCompanyViewModel
+
+@ViewBag.answer
+<hr />
+
+<p>
+    @Html.ValidationMessage("Message", new { @class = "text-danger", @id = "validation" })
+</p>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "AntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+<div id="IdCompany" hidden>
+    @Model.IdCompany
+</div>
+
+<div class="text-center">
+    <button type="button" class="btn btn-warning" onclick="Submit()">OK</button>
+    <button type="button" class="btn btn-basic" onclick="$('.dialog').dialog('close');">Отмена</button>
+</div>
+
+<script type="text/javascript">
+    function Submit() {
+        var form = $('#AntiForgeryForm');
+        var token = $('input[name="__RequestVerificationToken"]', form).val();
+
+        $.post("/Home/DeleteCompanyConfirm",
+         {
+             __RequestVerificationToken: token,
+             IdCompany: $("#IdCompany").text()
+         },
+         function (response) {
+             if (response === "True") {
+                 $('.dialog').dialog('close');
+
+                 var url = '@Url.Action("Index","Home")?page=' +@Model.Page +"&sortByname=" + $("#idsortByname").val() +
+                     "&sortBycountry=" + $("#idsortBycountry").val() + "&includesAdmins=" + $("#idincludesAdmins").prop('checked') +
+                     "&searchByName=" + $("#idsearchByName").val();
+                 location.href = url;
+             }
+             else
+                 $("#validation").text("Компания не найдена. Нажмите кнопку \"Отмена\"");
+         });
+    }
+</script>

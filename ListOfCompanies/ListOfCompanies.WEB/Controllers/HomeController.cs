@@ -1,0 +1,137 @@
+﻿using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using ListOfCompanies.WEB.Models;
+using ListOfCompanies.BLL.DTO;
+using ListOfCompanies.BLL.Interfaces;
+
+namespace ListOfCompanies.WEB.Controllers
+{
+    public class HomeController : Controller
+    {
+        ICompanyService CompanyService;
+        public HomeController(ICompanyService service)
+        {
+            CompanyService = service;
+        }
+
+        [Authorize]
+        public ActionResult Index(PagingFilteringViewModel model)
+        {
+            // Companies on page.
+            int pageSize = 10;
+            int page = model.Page;
+            int totalPages;
+            if (model.SearchByName != null && model.SearchByName.Trim()=="")
+                model.SearchByName = null;
+
+            var pagingFilteringViewModel = Mapper.Map<DTOPagingFilteringViewModel>(model);
+
+            var companyList = Mapper.Map<IEnumerable<DTOCompanyViewModel>, IEnumerable<CompanyViewModel>>
+                (CompanyService.GetCompanies(pagingFilteringViewModel, ref page, pageSize, out totalPages));
+
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+
+            return View(companyList);
+        }
+
+        public ActionResult About()
+        {
+            ViewBag.Message = "Тестовое задание - список компаний";
+
+            return View();
+        }
+
+        public ActionResult Contact()
+        {
+            ViewBag.Message = "Связаться с Админом";
+
+            return View();
+        }
+
+        [Authorize]
+        [HttpGet]
+        public ActionResult EditCompany(EditCompanyViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var companyViewModel = Mapper.Map<CompanyViewModel>(CompanyService.GetCompany(model.IdCompany));
+
+                if (companyViewModel != null)
+                {
+                    ViewBag.Title = "Редактирование компании";
+                    ViewBag.Page = model.Page;
+                    return View("CompanyView", companyViewModel);
+                }
+            }
+            return RedirectToAction("Index");
+        }
+
+        [Authorize]
+        [HttpGet]
+        public ActionResult CreateCompany(int page = 1)
+        {
+            ViewBag.Title = "Создание компании";
+            ViewBag.Page = page;
+            CompanyViewModel companyViewModel = new CompanyViewModel();
+            return View("CompanyView", companyViewModel);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit_CreateCompanyConfirm(CompanyViewModel model, int page = 1)
+        {
+            if (model.ID.ToString() == "00000000-0000-0000-0000-000000000000")
+                ViewBag.Title = "Создание компании";
+            else
+                ViewBag.Title = "Редактирование компании";
+
+            ViewBag.Page = page;
+            if (ModelState.IsValid)
+            {
+                model.Country = model.Country.Trim();
+                model.Name = model.Name.Trim();
+                string parametr;
+                var companyViewModelDto = Mapper.Map<DTOCompanyViewModel>(model);
+                if (CompanyService.Edit_CreateCompanyConfirm(companyViewModelDto, out parametr))
+                {
+                    model.ID = Guid.Parse(parametr);
+                    return View("CompanyView", model);
+                }
+                ModelState.AddModelError("", parametr);
+            }
+            return View("CompanyView", model);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public ActionResult DeleteCompany(DeleteCompanyViewModel model)
+        {
+            if (ModelState.IsValid)
+                ViewBag.answer = "Вы действительно хотите удалить компанию с названием \"" + model.Name + "\"";
+            else
+                ViewBag.answer = "Произошла ошибка. Закройте это окно и обновите страницу";
+            return PartialView("_DeleteCompanyPartial", model);
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public bool DeleteCompanyConfirm(Guid IdCompany)
+        {
+            return CompanyService.DeleteCompany(IdCompany);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            CompanyService.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

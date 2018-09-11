@@ -1,0 +1,190 @@
+﻿@model ListOfCompanies.WEB.Models.CompanyViewModel
+
+<style>
+    body {
+        padding-top: 10px;
+    }
+</style>
+
+@Styles.Render("~/Content/jquicss")
+@Styles.Render("~/Content/jqgridcss")
+
+@section Header
+{
+    <div class="text-center">
+        <h2>@ViewBag.Title</h2>
+    </div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Country, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Country, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Country, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Сохранить/редактировать компанию" class="btn btn-primary" 
+                       formaction="@Url.Action("Edit_CreateCompanyConfirm","Home",new { page = ViewBag.Page, ID=Model.ID })" formmethod="post"/>
+            </div>
+        </div>
+    </div>
+}
+
+<hr />
+
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+@if (Model.ID.ToString() != "00000000-0000-0000-0000-000000000000")
+{
+    <table id="jqgEndUser"></table>
+    <div id="jpager"></div>
+    <hr />
+    <table id="jqgAdminUser"></table>
+    <div id="jpagerA"></div>
+}
+else
+{
+    <h3>
+        Для добавления пользователей необходимо создать компанию
+    </h3>
+}
+@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+
+<div>
+    @Html.ActionLink("Вернуться на страницу "+(string)ViewBag.Page.ToString(), "Index", new { page= ViewBag.Page })
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery-ui")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqgrid")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.datepicker.setDefaults($.datepicker.regional['ru']);
+
+            var datemin = new Date(1940, 0, 1);
+
+            var date = new Date();
+            var datemax = new Date(date.getFullYear() - 18, 11, 31);
+
+
+            $("#jqgEndUser").jqGrid({
+                url: '@Url.Action("GetEndUsersCompany", "UsersCompany", new { IdCompany = Model.ID })',
+                //editurl: 'clientArray', ////////////////////////////////////
+                mtype: "GET",
+                datatype: "json",
+                colModel: [
+            { label: 'ID', name: 'ID', stype: 'text', key: true, hidden: true, editable: false },
+            {
+                label: 'Логин', name: 'Login', sortable: true, editable: true, edittype: 'text',
+                editoptions: { placeholder: "Введите логин" },
+                editrules: { required: true, email: true }
+            },
+            {
+                label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
+                editoptions: { value: "director:director;manager:manager;programmer:programmer;booker:booker" },
+                editrules: { required: true }
+            },
+            {
+                label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: true, width: 50, edittype: 'button',
+                formatoptions: { newformat: 'd.m.Y' },
+                editoptions: {
+                    placeholder: "Введите дату рождения d.m.Y",
+                    dataInit: function (element) {
+                        $(element).datepicker({
+                            id: 'DateOfBirth_datePicker',
+                            dateFormat: 'dd.mm.yy',
+                            changeMonth: true,
+                            changeYear: true,
+                            minDate: datemin,
+                            maxDate: datemax,
+                            showOn: 'focus',
+                            yearRange: (datemin.getFullYear() + ":" + datemax.getFullYear())
+                        });
+                    }
+                },
+                editrules: { required: true, date: true }
+            },
+            { label: 'Управляющий', name: 'IsManager', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50, 
+            editoptions: { value:"True:False"}
+            }
+                ],
+                width: $('body').innerWidth() - 50,
+                pager: '#jpager',
+                loadonce: true,
+                caption: "Конечные пользователи",
+                rowNum: 10,
+                scroll: 1,
+                viewrecords: true,
+                emptyrecords: 'Таблица пуста'
+            });
+
+            $("#jqgEndUser").jqGrid('navGrid', '#jpager', {
+                add: true,
+                // addtext:"Добавить",
+                del: true,
+                edit: true,
+                search: true,
+                //   searchtext: "Поиск",
+                refresh: true,
+                //   refreshtext: "Обновить"
+            },
+                   {
+                       viewPagerButtons:false,
+                       mtype: "POST",
+                       url: '@Url.Action("EditEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
+                       closeAfterEdit: true,
+                       recreateForm: true,
+                       afterComplete: function (response) {
+                           if (response.responseText) {
+                               alert(response.responseText);
+                           }
+                       }
+                   },
+        {
+            mtype: "POST",
+            url: '@Url.Action("CreateEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
+            closeAfterAdd: true,
+            recreateForm: true,
+            afterComplete: function (response) {
+                if (response.responseText) {
+                    alert(response.responseText);
+                }
+            }
+        },
+        {
+            mtype: "POST",
+            url: '@Url.Action("DeleteEndUsers", "UsersCompany")',
+            closeAfterDelete: true,
+            recreateForm: true,
+            msg: "Вы хотите удалить этого пользователя? ",
+            afterComplete: function (response) {
+                if (response.responseText) {
+                    alert(response.responseText);
+                }
+            }
+        }
+        );
+
+        });
+    </script>
+}

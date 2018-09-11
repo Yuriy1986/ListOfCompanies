@@ -1,0 +1,202 @@
+﻿@model IEnumerable<ListOfCompanies.WEB.Models.CompanyViewModel>
+@{
+    ViewBag.Title = "Главная";
+
+    @Styles.Render("~/Content/jquicss")
+    @Styles.Render("~/Content/jqgridcss")
+
+    SelectList nameList = new SelectList(new[] {
+        new SelectListItem { Selected = true, Text = "не задано", Value = null },
+        new SelectListItem { Selected = false, Text = "по возрастанию", Value = "true" },
+        new SelectListItem { Selected = false, Text = "по убыванию", Value = "false" }
+    }, "Value", "Text");
+
+    SelectList countryList = new SelectList(new[] {
+        new SelectListItem { Selected = true, Text = "не задано", Value = null },
+        new SelectListItem { Selected = false, Text = "по возрастанию", Value = "true" },
+        new SelectListItem { Selected = false, Text = "по убыванию", Value = "false" }
+    }, "Value", "Text");
+
+}
+<br />
+
+@using (Html.BeginForm("Index", "Home",FormMethod.Get))   // filter-form
+{
+    <div class="form-inline">
+        <div class="row">
+            <div class="form-group col-md-2">
+                <label for="sortByname">Сортировать по названию</label>
+                @Html.DropDownList("sortByname", nameList, new { @class = "form-control", @id = "idsortByname" })
+            </div>
+            <div class="form-group col-md-2">
+                <label for="sortBycountry">Сортировать по стране</label>
+                @Html.DropDownList("sortBycountry", countryList, new { @class = "form-control", @id = "idsortBycountry" })
+            </div>
+
+            <div class="form-group col-md-2">
+                <label for="includesAdmins">Есть администраторы</label>
+                @Html.CheckBox("includesAdmins", new { @id = "idincludesAdmins" })
+            </div>
+            <div class="form-group col-md-2">
+                <label for="searchByName">Поиск по названию</label>
+                @Html.TextBox("searchByName", null, new { @class = "form-control", @placeholder = "введите название", @id = "idsearchByName" })
+            </div>
+
+            <div class="form-group col-md-1">
+                <input type="submit" value="Фильтр" class="btn btn-primary" id="idFilter" />
+            </div>
+
+            <div class="form-group col-md-1">
+                <input type="button" onclick="clearFilter()" value="Сброс" class="btn btn-default" id="idClear" />
+            </div>
+        </div>
+
+        @if (@ViewBag.page == @ViewBag.totalPages)
+        {
+            <div class="text-center">
+                <br />
+                <input type="button" onclick="location.href='@Url.Action("CreateCompany", "Home", new { page = @ViewBag.page })'" value="Добавить компанию"
+                       class="btn btn-primary" />
+            </div>
+        }
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Country)
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @*///////////////////////////////////////////////////////////////////////*@
+                            @Html.ActionLink(item.Name, "GetUsersCompany", "UsersCompany",
+                   new { IdCompany = item.ID },
+                  new
+                  {
+                      @class = "viewDialog",
+                      data_dialog_title = "Пользователи компании " + item.Name + " :",
+                      data_dialog_up = "true",
+                      title = "Просмотр пользователей компании"
+                  })
+                            @*///////////////////////////////////////////////////////////////////////*@
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Country)
+                        </td>
+                        <td>
+                            @Html.ActionLink(" ", "EditCompany",
+                   new { IdCompany = item.ID, Page = ViewBag.page },
+                   new
+                   {
+                       @class = "glyphicon glyphicon-pencil btn btn-default",
+                       title = "Редактировать компанию"
+                   }) |
+
+                            @Html.ActionLink(" ", "DeleteCompany",
+                   new { IdCompany = item.ID, Name = item.Name, Page = ViewBag.page },
+                   new
+                   {
+                       @class = "viewDialog glyphicon glyphicon-remove btn btn-warning",
+                       data_dialog_title = "Удаление компании",
+                       data_dialog_up = "false",
+                       title = "Удалить компанию"
+                   })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (ViewBag.totalPages > 1)
+        {
+            <div class="pager">
+                <h6>Страница @ViewBag.page из @ViewBag.totalPages</h6>
+                @for (int i = 1; i <= (int)ViewBag.totalPages; i++)
+                {
+                    if (i == ViewBag.page)
+                    {
+                        <input type="submit" class="btn btn-primary" value="@i" formaction="@Url.Action("Index","Home",new { page = i })" formmethod="post" />
+                        continue;
+                    }
+                    <input type="submit" class="btn btn-default" value="@i" formaction="@Url.Action("Index","Home",new { page = i })" formmethod="post" />
+                }
+            </div>
+        }
+
+    </div>
+}
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/jquery-ui")
+
+    @*@Scripts.Render("~/bundles/jqueryval")*@
+    @Scripts.Render("~/bundles/jqgrid")
+
+    <script type="text/javascript">
+        function clearFilter() {
+            $("#idsortByname").val(null);
+            $("#idsortBycountry").val(null);
+            $("#idincludesAdmins").prop('checked', false);
+            $("#idsearchByName").val(null);
+            location.href = '@Url.Action("Index", "Home")';
+        };
+
+        $("#idsortByname, #idsortBycountry, #idincludesAdmins, #idsearchByName")
+            .on("change", function () {
+                if ($("#idincludesAdmins").prop('checked') || $("#idsortByname").val() || $("#idsortBycountry").val() || $("#idsearchByName").val().trim()!="")
+                    $("#idFilter, #idClear").css("visibility", "visible");
+                else
+                    $("#idFilter, #idClear").css("visibility", "hidden");
+            });
+
+
+        $(document).ready(function () {
+
+            if ($("#idincludesAdmins").prop('checked') || $("#idsortByname").val() || $("#idsortBycountry").val() || $("#idsearchByName").val())////////////////
+                $("#idFilter, #idClear").css("visibility", "visible");
+
+            $.ajaxSetup({ cache: false });
+
+            $(".viewDialog").on("click", function (e) {
+                e.preventDefault();
+
+                $("<div></div>")
+        .addClass("dialog")
+        .appendTo("table")
+        .dialog({
+            title: $(this).attr("data-dialog-title"),
+            textup: $(this).attr("data-dialog-up"),
+            close: function () { $(this).remove() },
+            modal: true,
+            draggable: false,
+            //beforeClose: function () {
+            //    $("html").css("overflow", "scroll");
+            //},
+
+            //open: function () {
+            //    $("html").css("overflow", "hidden");
+            //},
+            closeOnEscape: false,
+            open: function () {
+                if ($(this).dialog("option", "textup") === "true") {
+                    $(this).dialog("option", "position", { my: "top", at: "top+50", of: window });
+                    $(this).dialog("option", "width", $('body').innerWidth());
+                }
+            }
+        })
+        .load(this.href);
+            });
+        });
+    </script>
+}
+

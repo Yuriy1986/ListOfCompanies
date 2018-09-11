@@ -1,0 +1,55 @@
+﻿    <table id="jqgEndUser"></table>
+    <div id="jpagerE"></div>
+    <hr />
+    <table id="jqgAdminUser"></table>
+    <div id="jpagerA"></div>
+     
+    <hr />
+
+    <p class="text-center">
+        <button type="button" class="btn btn-basic" onclick="$('.dialog').dialog('close');">Закрыть</button>
+    </p>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#jqgEndUser").jqGrid({
+            url: '@Url.Action("GetEndUsersCompany", "UsersCompany", new { IdCompany = ViewBag.IdCompany })',
+            mtype: "GET",
+            datatype: "json",
+            colModel: [
+        { label: 'Логин', name: 'Login', sortable: true, editable: false},
+        { label: 'Должность', name: 'Position', sortable: true, editable: false},
+        { label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: false, width: 50 },
+        { label: 'Управляющий', name: 'IsManager', formatter: 'checkbox', sortable: true, editable: false, width:50 }
+            ],
+            width: $('body').innerWidth() - 50,
+            pager: '#jpagerE',
+            loadonce: true,
+            caption: "Конечные пользователи",
+            rowNum: 10,
+            scroll: 1,
+            viewrecords: true,
+            emptyrecords: 'Таблица пуста'
+        });
+        ////////////////////////////////////////////////////////////////////////
+        $("#jqgAdminUser").jqGrid({
+            url: '@Url.Action("GetAdminUsersCompany", "UsersCompany", new { IdCompany = ViewBag.IdCompany })',
+            mtype: "GET",
+            datatype: "json",
+            colModel: [
+        { label: 'Логин', name: 'Login', sortable: true, editable: false},
+        { label: 'Должность', name: 'Position', sortable: true, editable: false},
+        { label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: false, width: 50 },
+        { label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: false, width: 50 }
+            ],
+            width: $('body').innerWidth() - 50,
+            pager: '#jpagerA',
+            loadonce: true,
+            caption: "Администраторы",
+            rowNum: 10,
+            scroll: 1,
+            viewrecords: true,
+            emptyrecords: 'Таблица пуста'
+        });
+    });
+</script>
