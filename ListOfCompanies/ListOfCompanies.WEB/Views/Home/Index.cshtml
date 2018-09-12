@@ -20,8 +20,9 @@
 }
 <br />
 
-@using (Html.BeginForm("Index", "Home",FormMethod.Get))   // filter-form
+@using (Html.BeginForm("Index", "Home", FormMethod.Get))   // filter-form
 {
+    @Html.AntiForgeryToken()
     <div class="form-inline">
         <div class="row">
             <div class="form-group col-md-2">
@@ -55,8 +56,8 @@
         {
             <div class="text-center">
                 <br />
-                <input type="button" onclick="location.href='@Url.Action("CreateCompany", "Home", new { page = @ViewBag.page })'" value="Добавить компанию"
-                       class="btn btn-primary" />
+                <input type="submit" class="btn btn-primary" value="Добавить компанию" formmethod="post"
+                       formaction="@Url.Action("CreateCompany","Home",new { Page = @ViewBag.page })"  />
             </div>
         }
 
@@ -77,7 +78,6 @@
                 {
                     <tr>
                         <td>
-                            @*///////////////////////////////////////////////////////////////////////*@
                             @Html.ActionLink(item.Name, "GetUsersCompany", "UsersCompany",
                    new { IdCompany = item.ID },
                   new
@@ -87,19 +87,15 @@
                       data_dialog_up = "true",
                       title = "Просмотр пользователей компании"
                   })
-                            @*///////////////////////////////////////////////////////////////////////*@
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Country)
                         </td>
                         <td>
-                            @Html.ActionLink(" ", "EditCompany",
-                   new { IdCompany = item.ID, Page = ViewBag.page },
-                   new
-                   {
-                       @class = "glyphicon glyphicon-pencil btn btn-default",
-                       title = "Редактировать компанию"
-                   }) |
+                            <button class="glyphicon glyphicon-pencil btn btn-default" title="Редактировать компанию" type="submit" formmethod="post"
+                                   formaction="@Url.Action("EditCompany","Home",new { Page = @ViewBag.page, IdCompany = item.ID })" >
+                            </button>
+                            |
 
                             @Html.ActionLink(" ", "DeleteCompany",
                    new { IdCompany = item.ID, Name = item.Name, Page = ViewBag.page },
@@ -138,8 +134,6 @@
 @section scripts
 {
     @Scripts.Render("~/bundles/jquery-ui")
-
-    @*@Scripts.Render("~/bundles/jqueryval")*@
     @Scripts.Render("~/bundles/jqgrid")
 
     <script type="text/javascript">

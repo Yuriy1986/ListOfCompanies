@@ -54,12 +54,13 @@ namespace ListOfCompanies.WEB.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        public ActionResult EditCompany(EditCompanyViewModel model)
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult EditCompany(PagingFilteringViewModel model, Guid IdCompany)
         {
-            if (ModelState.IsValid)
+            if (IdCompany.ToString() != "00000000-0000-0000-0000-000000000000")
             {
-                var companyViewModel = Mapper.Map<CompanyViewModel>(CompanyService.GetCompany(model.IdCompany));
+                var companyViewModel = Mapper.Map<CompanyViewModel>(CompanyService.GetCompany(IdCompany));
 
                 if (companyViewModel != null)
                 {
@@ -72,11 +73,12 @@ namespace ListOfCompanies.WEB.Controllers
         }
 
         [Authorize]
-        [HttpGet]
-        public ActionResult CreateCompany(int page = 1)
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public ActionResult CreateCompany(PagingFilteringViewModel model)
         {
             ViewBag.Title = "Создание компании";
-            ViewBag.Page = page;
+            ViewBag.Page = model.Page;
             CompanyViewModel companyViewModel = new CompanyViewModel();
             return View("CompanyView", companyViewModel);
         }
