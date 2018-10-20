@@ -42,8 +42,10 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Сохранить/редактировать компанию" class="btn btn-primary" 
-                       formaction="@Url.Action("Edit_CreateCompanyConfirm","Home",new { page = ViewBag.Page, ID=Model.ID })" formmethod="post"/>
+                <input type="submit" value="Сохранить/редактировать компанию" class="btn btn-primary"
+                       formaction="@Url.Action("Edit_CreateCompanyConfirm","Home",new {Page = ViewBag.Page,
+    SortByname = ViewBag.SortByname, SortBycountry = ViewBag.SortBycountry, IncludesAdmins = ViewBag.IncludesAdmins,
+    SearchByName = ViewBag.SearchByName, ID=Model.ID })" formmetho formmethod="post" />
             </div>
         </div>
     </div>
@@ -68,9 +70,27 @@ else
 }
 @*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
 
-<div>
-    @Html.ActionLink("Вернуться на страницу "+(string)ViewBag.Page.ToString(), "Index", new { page= ViewBag.Page })
+<div class="text-center">
+    @if (ViewBag.Page != 1 || ViewBag.SortByname != null || ViewBag.SortBycountry != null || ViewBag.IncludesAdmins != false ||
+                        ViewBag.SearchByName != null)
+    {
+        @Html.ActionLink("Вернуться на активную страницу ", "Index", new
+   {
+       Page = ViewBag.Page,
+       SortByname = ViewBag.SortByname,
+       SortBycountry = ViewBag.SortBycountry,
+       IncludesAdmins = ViewBag.IncludesAdmins,
+       SearchByName = ViewBag.SearchByName
+   })
+        <span>|</span>
+    }
+    @Html.ActionLink("На главную", "Index")
 </div>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "AntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
 
 @section Scripts {
     @Scripts.Render("~/bundles/jquery-ui")
@@ -86,7 +106,6 @@ else
             var date = new Date();
             var datemax = new Date(date.getFullYear() - 18, 11, 31);
 
-
             $("#jqgEndUser").jqGrid({
                 url: '@Url.Action("GetEndUsersCompany", "UsersCompany", new { IdCompany = Model.ID })',
                 //editurl: 'clientArray', ////////////////////////////////////
@@ -101,7 +120,7 @@ else
             },
             {
                 label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
-                editoptions: { value: "director:director;manager:manager;programmer:programmer;booker:booker" },
+                editoptions: { value: { "": "", "director": "director", "manager": "manager", "programmer": "programmer", "booker": "booker" } },
                 editrules: { required: true }
             },
             {
@@ -124,8 +143,9 @@ else
                 },
                 editrules: { required: true, date: true }
             },
-            { label: 'Управляющий', name: 'IsManager', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50, 
-            editoptions: { value:"True:False"}
+            {
+                label: 'Управляющий', name: 'IsManager', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50,
+                editoptions: { value: "True:False" }
             }
                 ],
                 width: $('body').innerWidth() - 50,
@@ -149,7 +169,7 @@ else
                 //   refreshtext: "Обновить"
             },
                    {
-                       viewPagerButtons:false,
+                       viewPagerButtons: false,
                        mtype: "POST",
                        url: '@Url.Action("EditEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
                        closeAfterEdit: true,
@@ -165,10 +185,26 @@ else
             url: '@Url.Action("CreateEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
             closeAfterAdd: true,
             recreateForm: true,
-            afterComplete: function (response) {
-                if (response.responseText) {
-                    alert(response.responseText);
+            beforeSubmit: function () {
+                var message="";
+                var logins = $("#jqgEndUser").jqGrid('getCol', 'Login', false);
+                for (var i in logins)
+                {
+                    if ($("#Login").val() === logins[i])
+                    {
+                        message += "Пользоваель с логином \"" + logins[i] + "\" уже зарегистрирован";
+                        break;
+                    }
                 }
+                if (message === "")
+                    return [true];
+                return [false, message];
+            }, 
+
+            afterSubmit: function (response) {
+                if (response.responseText === "")
+                    return [true];
+                return [false, response.responseText];
             }
         },
         {
@@ -177,10 +213,11 @@ else
             closeAfterDelete: true,
             recreateForm: true,
             msg: "Вы хотите удалить этого пользователя? ",
-            afterComplete: function (response) {
-                if (response.responseText) {
-                    alert(response.responseText);
-                }
+
+            afterSubmit: function (response) {
+                if (response === "False")
+                    return [false, "Произошла ошибка. Обновите страницу"];
+                return [true];
             }
         }
         );

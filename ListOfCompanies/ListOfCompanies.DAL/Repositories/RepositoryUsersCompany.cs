@@ -29,5 +29,18 @@ namespace ListOfCompanies.DAL.Repositories
             return db.AdminUsers.Where(x => x.Companies.Contains(db.Companies.FirstOrDefault(y => y.ID == IdCompany)));
         }
 
+        public bool DeleteEndUser(Guid ID)
+        {
+            EndUser enduserCurrent = db.EndUsers.FirstOrDefault(x=>x.ID==ID);
+            if (enduserCurrent != null)
+            {
+                db.EndUsers.Remove(enduserCurrent);
+                db.Entry(enduserCurrent).State = EntityState.Deleted;
+                db.SaveChanges();
+                return true;
+            }
+            return false;
+        }
+
     }
 }

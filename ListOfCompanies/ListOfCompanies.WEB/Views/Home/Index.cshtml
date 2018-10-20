@@ -120,10 +120,10 @@
                 {
                     if (i == ViewBag.page)
                     {
-                        <input type="submit" class="btn btn-primary" value="@i" formaction="@Url.Action("Index","Home",new { page = i })" formmethod="post" />
+                        <input type="submit" class="btn btn-primary" value="@i" formaction="@Url.Action("Index","Home",new { Page = i })" formmethod="post" />
                         continue;
                     }
-                    <input type="submit" class="btn btn-default" value="@i" formaction="@Url.Action("Index","Home",new { page = i })" formmethod="post" />
+                    <input type="submit" class="btn btn-default" value="@i" formaction="@Url.Action("Index","Home",new { Page = i })" formmethod="post" />
                 }
             </div>
         }
@@ -145,7 +145,7 @@
             location.href = '@Url.Action("Index", "Home")';
         };
 
-        $("#idsortByname, #idsortBycountry, #idincludesAdmins, #idsearchByName")
+          $("#idsortByname, #idsortBycountry, #idincludesAdmins, #idsearchByName")
             .on("change", function () {
                 if ($("#idincludesAdmins").prop('checked') || $("#idsortByname").val() || $("#idsortBycountry").val() || $("#idsearchByName").val().trim()!="")
                     $("#idFilter, #idClear").css("visibility", "visible");
@@ -155,6 +155,8 @@
 
 
         $(document).ready(function () {
+            if ($("#idsearchByName").val().trim() === "")
+                $("#idsearchByName").val("");
 
             if ($("#idincludesAdmins").prop('checked') || $("#idsortByname").val() || $("#idsortBycountry").val() || $("#idsearchByName").val())////////////////
                 $("#idFilter, #idClear").css("visibility", "visible");

@@ -12,5 +12,7 @@ namespace ListOfCompanies.DAL.Interfaces
         IEnumerable<EndUser> GetEndUsersCompany(Guid IdCompany);
 
         IEnumerable<AdminUser> GetAdminUsersCompany(Guid IdCompany);
+
+        bool DeleteEndUser(Guid ID);
     }
 }

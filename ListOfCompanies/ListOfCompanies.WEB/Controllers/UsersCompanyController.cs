@@ -9,6 +9,7 @@ using ListOfCompanies.BLL.DTO;
 using ListOfCompanies.BLL.Interfaces;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace ListOfCompanies.WEB.Controllers
 {
@@ -43,7 +44,7 @@ namespace ListOfCompanies.WEB.Controllers
             var adminUsersCompany = Mapper.Map<IEnumerable<DTOAdminUserViewModel>, IEnumerable<AdminUserViewModel>>(UserCompanyService.GetAdminUsersCompany(IdCompany));
             return JsonConvert.SerializeObject(adminUsersCompany);
         }
-
+// .................................................................................................................................
         [Authorize]
         [HttpPost]
         public string EditEndUsers(EndUserViewModel model, Guid IdCompany)
@@ -53,19 +54,32 @@ namespace ListOfCompanies.WEB.Controllers
         }
 
         [Authorize]
-        [HttpPost]
-        public void CreateEndUsers(EndUserViewModel model, Guid IdCompany)
+        [HttpPost]        
+        public string CreateEndUsers([Bind(Exclude = "ID")] EndUserViewModel model, Guid IdCompany)
         {
-            // действия по добавлению
+            if(ModelState.IsValid)
+            {
 
+                return null;
+            }
+
+            StringBuilder errors = new StringBuilder();
+            foreach (var item in ModelState)
+            {
+                if(item.Value.Errors!=null)
+                {
+                    foreach (var er in item.Value.Errors)
+                        errors.Append(er.ErrorMessage+"\n");
+                }
+            }
+            return errors.ToString();
         }
 
         [Authorize]
         [HttpPost]
-        public string DeleteEndUsers(Guid ID)
+        public bool DeleteEndUsers(Guid ID)
         {
-            // действия по удалению
-            return "qqqqqqqqqqqqqq";
+            return UserCompanyService.DeleteEndUser(ID);
         }
 
     }

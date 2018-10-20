@@ -12,5 +12,7 @@ namespace ListOfCompanies.BLL.Interfaces
         IEnumerable<DTOEndUserViewModel> GetEndUsersCompany(Guid IdCompany);
 
         IEnumerable<DTOAdminUserViewModel> GetAdminUsersCompany(Guid IdCompany);
+
+        bool DeleteEndUser(Guid ID);
     }
 }

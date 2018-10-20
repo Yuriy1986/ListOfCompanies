@@ -55,7 +55,7 @@ namespace ListOfCompanies.WEB.Models
             }
             else
             {
-                return new ValidationResult("Проверьте дату рождения");
+                return new ValidationResult("Проверьте дату рождения (от 01/01/1940 до 01/01/2001)");
             }
         }
     }

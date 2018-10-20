@@ -31,6 +31,11 @@ namespace ListOfCompanies.BLL.Services
             return Mapper.Map<IEnumerable<AdminUser>, IEnumerable<DTOAdminUserViewModel>>(Database.UsersCompany.GetAdminUsersCompany(IdCompany));
         }
 
+        public bool DeleteEndUser(Guid ID)
+        {
+            return Database.UsersCompany.DeleteEndUser(ID);
+        }
+
         public void Dispose()
         {
             Database.Dispose();
