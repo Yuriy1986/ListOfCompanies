@@ -22,12 +22,11 @@
 
     <div class="form-horizontal">
         <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-
+        @Html.ValidationSummary(false, "", new { @class = "text-danger", @id = "idValidationForm" })
         <div class="form-group">
             @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @id = "idCompanyName" } })
                 @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -35,17 +34,19 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Country, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.EditorFor(model => model.Country, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.EditorFor(model => model.Country, new { htmlAttributes = new { @class = "form-control", @id = "idCompanyCountry" } })
                 @Html.ValidationMessageFor(model => model.Country, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Сохранить/редактировать компанию" class="btn btn-primary"
+                <input type="button" onclick="submitFormCompany()" value="Сохранить/редактировать компанию" class="btn btn-primary" />
+
+                <input type="submit" id="idFormSubmit" class="hidden"
                        formaction="@Url.Action("Edit_CreateCompanyConfirm","Home",new {Page = ViewBag.Page,
     SortByname = ViewBag.SortByname, SortBycountry = ViewBag.SortBycountry, IncludesAdmins = ViewBag.IncludesAdmins,
-    SearchByName = ViewBag.SearchByName, ID=Model.ID })" formmetho formmethod="post" />
+    SearchByName = ViewBag.SearchByName, ID=Model.ID })" formmethod="post" />
             </div>
         </div>
     </div>
@@ -58,7 +59,7 @@
 {
     <table id="jqgEndUser"></table>
     <div id="jpager"></div>
-    <hr />
+    <br />
     <table id="jqgAdminUser"></table>
     <div id="jpagerA"></div>
 }
@@ -72,7 +73,7 @@ else
 
 <div class="text-center">
     @if (ViewBag.Page != 1 || ViewBag.SortByname != null || ViewBag.SortBycountry != null || ViewBag.IncludesAdmins != false ||
-                        ViewBag.SearchByName != null)
+                                                                ViewBag.SearchByName != null)
     {
         @Html.ActionLink("Вернуться на активную страницу ", "Index", new
    {
@@ -87,10 +88,6 @@ else
     @Html.ActionLink("На главную", "Index")
 </div>
 
-@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "AntiForgeryForm" }))
-{
-    @Html.AntiForgeryToken()
-}
 
 @section Scripts {
     @Scripts.Render("~/bundles/jquery-ui")
@@ -98,7 +95,42 @@ else
     @Scripts.Render("~/bundles/jqgrid")
 
     <script type="text/javascript">
+
+        function submitFormCompany() {
+            if ($("#idCompanyName").val() === '@Model.Name' && $("#idCompanyCountry").val() === '@Model.Country') {
+                $("#idValidationForm").empty();
+                $("#idValidationForm").append("<ul><li>Компания не изменена</li></ul>");
+            }
+            else
+                $("#idFormSubmit").click();
+        }
+
         $(document).ready(function () {
+            $.extend(true, $.jgrid.edit, {
+                //beforeInitData: function () {
+                //    $("#editmodjqgEndUser" + this.id).remove();
+                //},
+                onInitializeForm: function ($form) {
+                    $form.css({ height: "auto", width: "auto" });
+                    $form.closest(".ui-jqdialog").css({ height: "auto", width: "auto" });
+                },
+                width: "auto"
+            });
+
+            function checkLoginEndUser() {
+                var message = "";
+                var logins = $("#jqgEndUser").jqGrid('getCol', 'Login', false);
+                for (var i in logins) {
+                    if ($("#Login").val() === logins[i]) {
+                        message += "Пользователь с логином \"" + logins[i] + "\" уже зарегистрирован";
+                        break;
+                    }
+                }
+                if (message === "")
+                    return [true];
+                return [false, message];
+            }
+
             $.datepicker.setDefaults($.datepicker.regional['ru']);
 
             var datemin = new Date(1940, 0, 1);
@@ -116,12 +148,12 @@ else
             {
                 label: 'Логин', name: 'Login', sortable: true, editable: true, edittype: 'text',
                 editoptions: { placeholder: "Введите логин" },
-                editrules: { required: true, email: true }
+                editrules: { required: true, email: true }// ////////////////////////////////////
             },
             {
                 label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
                 editoptions: { value: { "": "", "director": "director", "manager": "manager", "programmer": "programmer", "booker": "booker" } },
-                editrules: { required: true }
+                editrules: { required: true }// ///////////////////////////////////////
             },
             {
                 label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: true, width: 50, edittype: 'button',
@@ -171,40 +203,56 @@ else
                    {
                        viewPagerButtons: false,
                        mtype: "POST",
-                       url: '@Url.Action("EditEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
+                       url: '@Url.Action("EditEndUsers", "UsersCompany")',
                        closeAfterEdit: true,
                        recreateForm: true,
-                       afterComplete: function (response) {
-                           if (response.responseText) {
-                               alert(response.responseText);
+                       resize: false,
+
+                       beforeSubmit: function () {
+                           return checkLoginEndUser();
+                       },
+
+                       afterSubmit: function (response) {
+                           var data = JSON.parse(response.responseText);
+                           if (data.ID !== undefined) {
+                               var mydataadd = [{
+                                   ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
+                                   IsManager: data.IsManager
+                               }];
+
+                               $("#jqgEndUser").setCell(data.ID, 'Login', data.Login);
+                               $("#jqgEndUser").setCell(data.ID, 'Position', data.Position);
+                               $("#jqgEndUser").setCell(data.ID, 'DateOfBirth', data.DateOfBirth);
+                               $("#jqgEndUser").setCell(data.ID, 'IsManager', data.IsManager);
+
+                               return [true];
                            }
+                           return [false, data];
                        }
+
                    },
         {
             mtype: "POST",
             url: '@Url.Action("CreateEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
+            resize: false,
             closeAfterAdd: true,
             recreateForm: true,
+
             beforeSubmit: function () {
-                var message="";
-                var logins = $("#jqgEndUser").jqGrid('getCol', 'Login', false);
-                for (var i in logins)
-                {
-                    if ($("#Login").val() === logins[i])
-                    {
-                        message += "Пользоваель с логином \"" + logins[i] + "\" уже зарегистрирован";
-                        break;
-                    }
-                }
-                if (message === "")
-                    return [true];
-                return [false, message];
-            }, 
+                return checkLoginEndUser();
+            },
 
             afterSubmit: function (response) {
-                if (response.responseText === "")
+                var data = JSON.parse(response.responseText);
+                if (data.ID !== undefined) {
+                    var mydataadd = [{
+                        ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
+                        IsManager: data.IsManager
+                    }];
+                    $("#jqgEndUser").addRowData("ID", mydataadd);
                     return [true];
-                return [false, response.responseText];
+                }
+                return [false, data];
             }
         },
         {
@@ -212,6 +260,7 @@ else
             url: '@Url.Action("DeleteEndUsers", "UsersCompany")',
             closeAfterDelete: true,
             recreateForm: true,
+            resize: false,
             msg: "Вы хотите удалить этого пользователя? ",
 
             afterSubmit: function (response) {
@@ -221,6 +270,104 @@ else
             }
         }
         );
+///////////////////////////////////////////////////////////////////////////////////////////
+            $("#jqgAdminUser").jqGrid({
+                url: '@Url.Action("GetAdminUsersCompany", "UsersCompany", new { IdCompany = Model.ID })',
+                mtype: "GET",
+                datatype: "json",
+                colModel: [
+            { label: 'ID', name: 'ID', stype: 'text', key: true, hidden: true, editable: false },
+            {
+                label: 'Логин', name: 'Login', sortable: true, editable: true, edittype: 'text',
+                editoptions: { placeholder: "Введите логин" },
+                editrules: { required: true, email: true }// ////////////////////////////////////
+            },
+            {
+                label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
+                editoptions: { value: { "": "", "director": "director", "manager": "manager", "programmer": "programmer", "booker": "booker" } },
+                editrules: { required: true }// ///////////////////////////////////////
+            },
+            {
+                label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: true, width: 50, edittype: 'button',
+                formatoptions: { newformat: 'd.m.Y' },
+                editoptions: {
+                    placeholder: "Введите дату рождения d.m.Y",
+                    dataInit: function (element) {
+                        $(element).datepicker({
+                            id: 'DateOfBirth_datePicker',
+                            dateFormat: 'dd.mm.yy',
+                            changeMonth: true,
+                            changeYear: true,
+                            minDate: datemin,
+                            maxDate: datemax,
+                            showOn: 'focus',
+                            yearRange: (datemin.getFullYear() + ":" + datemax.getFullYear())
+                        });
+                    }
+                },
+                editrules: { required: true, date: true }
+            },
+            {
+                label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50,
+                editoptions: { value: "True:False" }
+            }
+                ],
+                width: $('body').innerWidth()-50,
+                pager: '#jpagerA',
+                loadonce: true,
+                caption: "Администраторы",
+                rowNum: 10,
+                scroll: 1,
+                viewrecords: true,
+                emptyrecords: 'Таблица пуста'
+            });
+
+            $("#jqgAdminUser").jqGrid('navGrid', '#jpagerA', {
+                add: true,
+                del: true,
+                edit: false,
+                search: true,
+                refresh: true,
+            },
+{
+    mtype: "POST",
+    url: '@Url.Action("CreateEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
+    resize: false,
+    closeAfterAdd: true,
+    recreateForm: true,
+
+    beforeSubmit: function () {
+        return checkLoginEndUser();
+    },
+
+    afterSubmit: function (response) {
+        var data = JSON.parse(response.responseText);
+        if (data.ID !== undefined) {
+            var mydataadd = [{
+                ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
+                IsManager: data.IsManager
+            }];
+            $("#jqgEndUser").addRowData("ID", mydataadd);
+            return [true];
+        }
+        return [false, data];
+    }
+},
+{
+    mtype: "POST",
+    url: '@Url.Action("DeleteEndUsers", "UsersCompany")',
+    closeAfterDelete: true,
+    recreateForm: true,
+    resize: false,
+    msg: "Вы хотите удалить этого пользователя? ",
+
+    afterSubmit: function (response) {
+        if (response === "False")
+            return [false, "Произошла ошибка. Обновите страницу"];
+        return [true];
+    }
+}
+);
 
         });
     </script>

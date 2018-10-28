@@ -36,6 +36,18 @@ namespace ListOfCompanies.BLL.Services
             return Database.UsersCompany.DeleteEndUser(ID);
         }
 
+        public bool CreateEndUser(DTOEndUserViewModel model, Guid IdCompany, out string parametr)
+        {
+            var enduser = Mapper.Map<EndUser>(model);
+            return Database.UsersCompany.CreateEndUser(enduser, IdCompany, out parametr);
+        }
+
+        public bool EditEndUser(DTOEndUserViewModel model, out string parametr)
+        {
+            var enduser = Mapper.Map<EndUser>(model);
+            return Database.UsersCompany.EditEndUser(enduser, out parametr);
+        }
+
         public void Dispose()
         {
             Database.Dispose();

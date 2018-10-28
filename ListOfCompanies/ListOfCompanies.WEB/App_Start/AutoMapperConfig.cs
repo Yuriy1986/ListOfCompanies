@@ -30,6 +30,9 @@ namespace ListOfCompanies.WEB.App_Start
                     // UserCompanyService / GetAdminUsersCompany.
                     cfg.CreateMap<AdminUser, DTOAdminUserViewModel>();
 
+                    // UserCompanyService / CreateEndUser, EditEndUsers.
+                    cfg.CreateMap<DTOEndUserViewModel, EndUser>();
+
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     //WEB.
@@ -60,6 +63,9 @@ namespace ListOfCompanies.WEB.App_Start
 
                     // UsersCompany / GetAdminUsersCompany
                     cfg.CreateMap<DTOAdminUserViewModel, AdminUserViewModel>();
+
+                    // UsersCompany / CreateEndUsers, EditEndUsers
+                    cfg.CreateMap<DTOEndUserViewModel, EndUserViewModel>();///////////////////////////////////////////
 
                 }
                 );

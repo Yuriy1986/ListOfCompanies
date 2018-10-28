@@ -14,5 +14,10 @@ namespace ListOfCompanies.DAL.Interfaces
         IEnumerable<AdminUser> GetAdminUsersCompany(Guid IdCompany);
 
         bool DeleteEndUser(Guid ID);
+
+        bool CreateEndUser(EndUser enduser, Guid IdCompany, out string parametr);
+
+        bool EditEndUser(EndUser enduser, out string parametr);
+
     }
 }

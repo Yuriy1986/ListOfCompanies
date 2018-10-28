@@ -44,42 +44,74 @@ namespace ListOfCompanies.WEB.Controllers
             var adminUsersCompany = Mapper.Map<IEnumerable<DTOAdminUserViewModel>, IEnumerable<AdminUserViewModel>>(UserCompanyService.GetAdminUsersCompany(IdCompany));
             return JsonConvert.SerializeObject(adminUsersCompany);
         }
-// .................................................................................................................................
+
         [Authorize]
         [HttpPost]
-        public string EditEndUsers(EndUserViewModel model, Guid IdCompany)
+        public string EditEndUsers(EndUserViewModel model)
         {
-            // действия по редактированию
-            return "EditEndUsers";
+            if (ModelState.IsValid)
+            {
+                model.Login = model.Login.Trim();
+                model.Position = model.Position.Trim();
+                var endUserViewModelDto = Mapper.Map<DTOEndUserViewModel>(model);
+                string parametr;
+
+                if (UserCompanyService.EditEndUser(endUserViewModelDto, out parametr))
+                    return JsonConvert.SerializeObject(model);
+                return JsonConvert.SerializeObject(parametr);
+            }
+            return ErrorsUsers(ModelState);
         }
 
         [Authorize]
-        [HttpPost]        
+        [HttpPost]
         public string CreateEndUsers([Bind(Exclude = "ID")] EndUserViewModel model, Guid IdCompany)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
+                model.Login = model.Login.Trim();
+                model.Position = model.Position.Trim();
+                var endUserViewModelDto = Mapper.Map<DTOEndUserViewModel>(model);
+                string parametr;
 
-                return null;
-            }
-
-            StringBuilder errors = new StringBuilder();
-            foreach (var item in ModelState)
-            {
-                if(item.Value.Errors!=null)
+                if (UserCompanyService.CreateEndUser(endUserViewModelDto, IdCompany, out parametr))
                 {
-                    foreach (var er in item.Value.Errors)
-                        errors.Append(er.ErrorMessage+"\n");
+                    model.ID = Guid.Parse(parametr);
+                    return JsonConvert.SerializeObject(model);
                 }
+                return JsonConvert.SerializeObject(parametr);
             }
-            return errors.ToString();
+            return ErrorsUsers(ModelState);
         }
 
-        [Authorize]
+        private string ErrorsUsers(ModelStateDictionary modelState)
+        {
+            StringBuilder errors = new StringBuilder();
+
+            foreach (var item in modelState)
+            {
+                if (item.Value.Errors != null)
+                {
+                    foreach (var er in item.Value.Errors)
+                        errors.Append(er.ErrorMessage + "<br/>");
+                }
+            }
+            return JsonConvert.SerializeObject(errors.ToString());
+        }
+
+        [Authorize]        
         [HttpPost]
         public bool DeleteEndUsers(Guid ID)
         {
             return UserCompanyService.DeleteEndUser(ID);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public bool DeleteAdminUsers(Guid ID)
+        {
+            return true;
+            //return UserCompanyService.DeleteEndUser(ID);
         }
 
     }

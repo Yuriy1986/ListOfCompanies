@@ -14,5 +14,10 @@ namespace ListOfCompanies.BLL.Interfaces
         IEnumerable<DTOAdminUserViewModel> GetAdminUsersCompany(Guid IdCompany);
 
         bool DeleteEndUser(Guid ID);
+
+        bool CreateEndUser(DTOEndUserViewModel model, Guid IdCompany, out string parametr);
+
+        bool EditEndUser(DTOEndUserViewModel model, out string parametr);
+
     }
 }
