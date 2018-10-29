@@ -108,10 +108,27 @@ namespace ListOfCompanies.WEB.Controllers
 
         [Authorize]
         [HttpPost]
-        public bool DeleteAdminUsers(Guid ID)
+        public bool DeleteAdminUsersInCompany(Guid ID, Guid IdCompany)
         {
-            return true;
-            //return UserCompanyService.DeleteEndUser(ID);
+            return UserCompanyService.DeleteAdminUsersInCompany(ID, IdCompany);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public string EditAdminUsers(AdminUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.Login = model.Login.Trim();
+                model.Position = model.Position.Trim();
+                var adminUserViewModelDto = Mapper.Map<DTOAdminUserViewModel>(model);
+                string parametr;
+
+                if (UserCompanyService.EditAdminUser(adminUserViewModelDto, out parametr))
+                    return JsonConvert.SerializeObject(model);
+                return JsonConvert.SerializeObject(parametr);
+            }
+            return ErrorsUsers(ModelState);
         }
 
     }

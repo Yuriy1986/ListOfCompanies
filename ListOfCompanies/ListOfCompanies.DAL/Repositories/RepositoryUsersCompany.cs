@@ -91,5 +91,56 @@ namespace ListOfCompanies.DAL.Repositories
             parametr = "Пользователь не найден. Закройте это окно и обновите страницу";
             return false;
         }
+
+        public bool DeleteAdminUsersInCompany(Guid ID, Guid IdCompany)
+        {
+            Company companyCurrent = db.Companies.Include(x=>x.AdminUsers).FirstOrDefault(y => y.ID == IdCompany);
+            AdminUser adminUserCurrent = db.AdminUsers.FirstOrDefault(x => x.ID == ID);
+            if (companyCurrent!=null && adminUserCurrent != null)
+            {
+                if (companyCurrent.AdminUsers.Remove(adminUserCurrent))
+                {
+                    if (companyCurrent.AdminUsers.Count == 0)
+                        companyCurrent.IncludesAdminUser = false;
+                    db.SaveChanges();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool EditAdminUser(AdminUser adminuser, out string parametr)
+        {
+            AdminUser adminuserCurrent = db.AdminUsers.FirstOrDefault(x => x.ID == adminuser.ID);
+            if (adminuserCurrent != null)
+            {
+                if (adminuserCurrent.DateOfBirth == adminuser.DateOfBirth && adminuserCurrent.IsActive == adminuser.IsActive
+                    && adminuserCurrent.Login == adminuser.Login && adminuserCurrent.Position == adminuser.Position)
+                {
+                    parametr = "Данные не изменены";
+                    return false;
+                }
+
+                AdminUser checkLogin = db.AdminUsers.FirstOrDefault(x => x.Login == adminuser.Login);
+                if (checkLogin != null && checkLogin != adminuserCurrent)
+                {
+                    parametr = "Пользователь с таким логином уже зарегисрирован";
+                    return false;
+                }
+
+                adminuserCurrent.DateOfBirth = adminuser.DateOfBirth;
+                adminuserCurrent.IsActive = adminuser.IsActive;
+                adminuserCurrent.Login = adminuser.Login;
+                adminuserCurrent.Position = adminuser.Position;
+
+                db.Entry(adminuserCurrent).State = EntityState.Modified;
+                db.SaveChanges();
+                parametr = "";
+                return true;
+            }
+            parametr = "Пользователь не найден. Закройте это окно и обновите страницу";
+            return false;
+        }
+
     }
 }

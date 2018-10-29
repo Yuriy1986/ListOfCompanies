@@ -19,5 +19,10 @@ namespace ListOfCompanies.BLL.Interfaces
 
         bool EditEndUser(DTOEndUserViewModel model, out string parametr);
 
+        bool DeleteAdminUsersInCompany(Guid ID, Guid IdCompany);
+
+        bool EditAdminUser(DTOAdminUserViewModel model, out string parametr);
+
+
     }
 }

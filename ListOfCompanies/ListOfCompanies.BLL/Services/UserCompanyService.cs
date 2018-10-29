@@ -48,6 +48,17 @@ namespace ListOfCompanies.BLL.Services
             return Database.UsersCompany.EditEndUser(enduser, out parametr);
         }
 
+        public bool DeleteAdminUsersInCompany(Guid ID, Guid IdCompany)
+        {
+            return Database.UsersCompany.DeleteAdminUsersInCompany(ID, IdCompany);
+        }
+
+        public bool EditAdminUser(DTOAdminUserViewModel model, out string parametr)
+        {
+            var adminuser = Mapper.Map<AdminUser>(model);
+            return Database.UsersCompany.EditAdminUser(adminuser, out parametr);
+        }
+
         public void Dispose()
         {
             Database.Dispose();

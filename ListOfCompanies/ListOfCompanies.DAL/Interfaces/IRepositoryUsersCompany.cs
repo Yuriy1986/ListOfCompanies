@@ -19,5 +19,9 @@ namespace ListOfCompanies.DAL.Interfaces
 
         bool EditEndUser(EndUser enduser, out string parametr);
 
+        bool DeleteAdminUsersInCompany(Guid ID, Guid IdCompany);
+
+        bool EditAdminUser(AdminUser adminuser, out string parametr);
+
     }
 }

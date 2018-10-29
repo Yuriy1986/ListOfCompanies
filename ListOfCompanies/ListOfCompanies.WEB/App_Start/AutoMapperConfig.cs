@@ -14,15 +14,11 @@ namespace ListOfCompanies.WEB.App_Start
                 cfg =>
                 {
                     //BLL.
-                    // CompanyService / GetCompanies.
-                    cfg.CreateMap<Company, DTOCompanyViewModel>();
-
-                    // CompanyService / GetCompany.
+                    // CompanyService / GetCompanies, GetCompany.
                     cfg.CreateMap<Company, DTOCompanyViewModel>();
 
                     // CompanyService / Edit_CreateCompanyConfirm
                     cfg.CreateMap<DTOCompanyViewModel,Company>();
-
 
                     // UserCompanyService / GetEndUsersCompany.
                     cfg.CreateMap<EndUser, DTOEndUserViewModel>();
@@ -33,6 +29,8 @@ namespace ListOfCompanies.WEB.App_Start
                     // UserCompanyService / CreateEndUser, EditEndUsers.
                     cfg.CreateMap<DTOEndUserViewModel, EndUser>();
 
+                    // UserCompanyService / EditAdminUser.
+                    cfg.CreateMap<DTOAdminUserViewModel, AdminUser>();
 
                     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     //WEB.
@@ -58,15 +56,13 @@ namespace ListOfCompanies.WEB.App_Start
                     // Home / EditCompany.
                     cfg.CreateMap<DTOCompanyViewModel, CompanyViewModel>();
 
-                    // UsersCompany / GetEndUsersCompany
+                    // UsersCompany / GetEndUsersCompany, CreateEndUsers, EditEndUsers
                     cfg.CreateMap<DTOEndUserViewModel, EndUserViewModel>();
 
-                    // UsersCompany / GetAdminUsersCompany
+                    // UsersCompany / GetAdminUsersCompany, EditAdminUsers
                     cfg.CreateMap<DTOAdminUserViewModel, AdminUserViewModel>();
 
-                    // UsersCompany / CreateEndUsers, EditEndUsers
-                    cfg.CreateMap<DTOEndUserViewModel, EndUserViewModel>();///////////////////////////////////////////
-
+               
                 }
                 );
         }

@@ -59,7 +59,7 @@
 {
     <table id="jqgEndUser"></table>
     <div id="jpager"></div>
-    <br />
+    <hr />
     <table id="jqgAdminUser"></table>
     <div id="jpagerA"></div>
 }
@@ -73,7 +73,7 @@ else
 
 <div class="text-center">
     @if (ViewBag.Page != 1 || ViewBag.SortByname != null || ViewBag.SortBycountry != null || ViewBag.IncludesAdmins != false ||
-                                                                ViewBag.SearchByName != null)
+                                                                        ViewBag.SearchByName != null)
     {
         @Html.ActionLink("Вернуться на активную страницу ", "Index", new
    {
@@ -103,7 +103,7 @@ else
             }
             else
                 $("#idFormSubmit").click();
-        }
+        };
 
         $(document).ready(function () {
             $.extend(true, $.jgrid.edit, {
@@ -117,19 +117,20 @@ else
                 width: "auto"
             });
 
-            function checkLoginEndUser() {
+            function checkLoginEndUser(idCurrent) {
                 var message = "";
-                var logins = $("#jqgEndUser").jqGrid('getCol', 'Login', false);
-                for (var i in logins) {
-                    if ($("#Login").val() === logins[i]) {
-                        message += "Пользователь с логином \"" + logins[i] + "\" уже зарегистрирован";
+                var mydata = $("#jqgEndUser").jqGrid('getGridParam', 'data');
+                // var logins = $("#jqgEndUser").jqGrid('getCol', 'Login', false);
+                for (var i in mydata) {
+                    if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
+                        message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
                         break;
                     }
                 }
                 if (message === "")
                     return [true];
                 return [false, message];
-            }
+            };
 
             $.datepicker.setDefaults($.datepicker.regional['ru']);
 
@@ -209,20 +210,17 @@ else
                        resize: false,
 
                        beforeSubmit: function () {
-                           return checkLoginEndUser();
+                           var idCurrent = $("#id_g").val();
+                           return checkLoginEndUser(idCurrent);
                        },
 
                        afterSubmit: function (response) {
                            var data = JSON.parse(response.responseText);
                            if (data.ID !== undefined) {
-                               var mydataadd = [{
-                                   ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
-                                   IsManager: data.IsManager
-                               }];
-
+                               var date = new Date(Date.parse(data.DateOfBirth));
                                $("#jqgEndUser").setCell(data.ID, 'Login', data.Login);
                                $("#jqgEndUser").setCell(data.ID, 'Position', data.Position);
-                               $("#jqgEndUser").setCell(data.ID, 'DateOfBirth', data.DateOfBirth);
+                               $("#jqgEndUser").setCell(data.ID, 'DateOfBirth', date);
                                $("#jqgEndUser").setCell(data.ID, 'IsManager', data.IsManager);
 
                                return [true];
@@ -270,7 +268,7 @@ else
             }
         }
         );
-///////////////////////////////////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////
             $("#jqgAdminUser").jqGrid({
                 url: '@Url.Action("GetAdminUsersCompany", "UsersCompany", new { IdCompany = Model.ID })',
                 mtype: "GET",
@@ -312,7 +310,7 @@ else
                 editoptions: { value: "True:False" }
             }
                 ],
-                width: $('body').innerWidth()-50,
+                width: $('body').innerWidth() - 32,
                 pager: '#jpagerA',
                 loadonce: true,
                 caption: "Администраторы",
@@ -325,10 +323,40 @@ else
             $("#jqgAdminUser").jqGrid('navGrid', '#jpagerA', {
                 add: true,
                 del: true,
-                edit: false,
+                edit: true,
                 search: true,
                 refresh: true,
             },
+                               {
+                                   viewPagerButtons: false,
+                                   mtype: "POST",
+                                   url: '@Url.Action("EditAdminUsers", "UsersCompany")',
+                                   closeAfterEdit: true,
+                                   recreateForm: true,
+                                   resize: false,
+
+                                   beforeSubmit: function () {
+                                       return checkLoginEndUser();
+                                   },
+
+                                   afterSubmit: function (response) {
+                                       var data = JSON.parse(response.responseText);
+                                       if (data.ID !== undefined) {
+                                           var mydataadd = [{
+                                               ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
+                                               IsActive: data.IsActive
+                                           }];
+
+                                           $("#jqgAdminUser").setCell(data.ID, 'Login', data.Login);
+                                           $("#jqgAdminUser").setCell(data.ID, 'Position', data.Position);
+                                           $("#jqgAdminUser").setCell(data.ID, 'DateOfBirth', data.DateOfBirth);
+                                           $("#jqgAdminUser").setCell(data.ID, 'IsActive', data.IsActive);
+
+                                           return [true];
+                                       }
+                                       return [false, data];
+                                   }
+                               },
 {
     mtype: "POST",
     url: '@Url.Action("CreateEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
@@ -355,11 +383,11 @@ else
 },
 {
     mtype: "POST",
-    url: '@Url.Action("DeleteEndUsers", "UsersCompany")',
+    url: '@Url.Action("DeleteAdminUsersInCompany", "UsersCompany", new { IdCompany = Model.ID })',
     closeAfterDelete: true,
     recreateForm: true,
     resize: false,
-    msg: "Вы хотите удалить этого пользователя? ",
+    msg: "Вы хотите удалить этого пользователя <br/>(только из этой компании)? ",
 
     afterSubmit: function (response) {
         if (response === "False")
@@ -369,6 +397,6 @@ else
 }
 );
 
-        });
+        });//(document).ready
     </script>
 }
