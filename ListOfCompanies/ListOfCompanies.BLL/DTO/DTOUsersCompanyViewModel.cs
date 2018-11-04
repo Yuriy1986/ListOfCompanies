@@ -14,6 +14,10 @@ namespace ListOfCompanies.BLL.DTO
     public class DTOAdminUserViewModel : DTOUserViewModel
     {
         public bool IsActive { get; set; }
+
+        public List<string> NamesCompanies { get; set; }
+
+        public List<string> CountriesCompanies { get; set; }
     }
 
     public class DTOUserViewModel

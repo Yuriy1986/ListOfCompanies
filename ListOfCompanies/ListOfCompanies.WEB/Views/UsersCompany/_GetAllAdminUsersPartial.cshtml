@@ -1,0 +1,93 @@
+﻿<table id="jqgAdminUser"></table>
+<div id="jpagerA"></div>
+
+<hr />
+
+<p class="text-center">
+    <button type="button" class="btn btn-basic" onclick="$('.dialog').dialog('close');">Закрыть</button>
+</p>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.extend(true, $.jgrid.edit, {
+            onInitializeForm: function ($form) {
+                $form.css({ height: "auto", width: "auto" });
+                $form.closest(".ui-jqdialog").css({ height: "auto", width: "auto" });
+            },
+            width: "auto"
+        });
+
+        function checkLoginAdminUser(idCurrent) {
+            var message = "";
+            var mydata = $("#jqgAdminUser").jqGrid('getGridParam', 'data');
+            for (var i in mydata) {
+                if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
+                    message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
+                    break;
+                }
+            }
+            if (message === "")
+                return [true];
+            return [false, message];
+        };
+
+        $.datepicker.setDefaults($.datepicker.regional['ru']);
+
+        var datemin = new Date(1940, 0, 1);
+
+        var date = new Date();
+        var datemax = new Date(date.getFullYear() - 18, 11, 31);
+
+        $("#jqgAdminUser").jqGrid({
+            url: '@Url.Action("GetAllAdminUsers", "UsersCompany")',
+            mtype: "GET",
+            datatype: "json",
+            colModel: [
+        { label: 'ID', name: 'ID', stype: 'text', key: true, hidden: true, editable: false },
+        {
+            label: 'Логин', name: 'Login', sortable: true, editable: true, edittype: 'text',
+            editoptions: { placeholder: "Введите логин" },
+            editrules: { required: true, email: true }// ////////////////////////////////////
+        },
+        {
+            label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
+            editoptions: { value: { "": "", "director": "director", "manager": "manager", "programmer": "programmer", "booker": "booker" } },
+            editrules: { required: true }// ///////////////////////////////////////
+        },
+        {
+            label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: true, width: 50, edittype: 'button',
+            formatoptions: { newformat: 'd.m.Y' },
+            editoptions: {
+                placeholder: "Введите дату рождения d.m.Y",
+                dataInit: function (element) {
+                    $(element).datepicker({
+                        id: 'DateOfBirth_datePicker',
+                        dateFormat: 'dd.mm.yy',
+                        changeMonth: true,
+                        changeYear: true,
+                        minDate: datemin,
+                        maxDate: datemax,
+                        showOn: 'focus',
+                        yearRange: (datemin.getFullYear() + ":" + datemax.getFullYear())
+                    });
+                }
+            },
+            editrules: { required: true, date: true }
+        },
+        {
+            label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50,
+            editoptions: { value: "True:False" }
+        }
+            ],
+            width: $('body').innerWidth() - 32,
+            pager: '#jpagerA',
+            loadonce: true,
+            caption: "Администраторы",
+            rowNum: 10,
+            scroll: 1,
+            viewrecords: true,
+            emptyrecords: 'Таблица пуста'
+        });
+
+    });
+</script>

@@ -29,6 +29,12 @@ namespace ListOfCompanies.DAL.Repositories
             return db.AdminUsers.Where(x => x.Companies.Contains(db.Companies.FirstOrDefault(y => y.ID == IdCompany)));
         }
 
+        // Get all adminUsers becides current company.
+        public IEnumerable<AdminUser> GetAdminUsers(Guid IdCompany)
+        {
+            return db.AdminUsers.Except(db.AdminUsers.Where(x => x.Companies.Contains(db.Companies.FirstOrDefault(y => y.ID == IdCompany))));
+        }
+
         public bool DeleteEndUser(Guid ID)
         {
             EndUser enduserCurrent = db.EndUsers.FirstOrDefault(x => x.ID == ID);
@@ -142,5 +148,35 @@ namespace ListOfCompanies.DAL.Repositories
             return false;
         }
 
+        public IEnumerable<AdminUser> CreateAdminUsersInCompany(Guid[] idUsers, Guid IdCompany)
+        {
+            Company companyCurrent = db.Companies.Include(x => x.AdminUsers).FirstOrDefault(y => y.ID == IdCompany);
+            if(companyCurrent!=null)
+            {
+                List<AdminUser> newList = new List<AdminUser>();
+                foreach (var item in idUsers)
+                {
+                    AdminUser adminUserCurrent = db.AdminUsers.FirstOrDefault(x => x.ID == item);
+                    if(adminUserCurrent!=null)
+                    {
+                        if(companyCurrent.AdminUsers.FirstOrDefault(x => x.ID == item)==null)
+                        {
+                            companyCurrent.AdminUsers.Add(adminUserCurrent);
+                            companyCurrent.IncludesAdminUser = true;
+                            db.SaveChanges();
+                            newList.Add(adminUserCurrent);
+                        }
+                    }
+                }
+                return newList;
+            }
+            return null;
+        }
+
+        // _GetAllAdminUsersPartial.
+        public IEnumerable<AdminUser> GetAllAdminUsers()
+        {
+            return db.AdminUsers.Include(x=>x.Companies);
+        }
     }
 }

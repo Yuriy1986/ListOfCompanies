@@ -70,6 +70,16 @@ else
     </h3>
 }
 @*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
+<div>
+    @Html.ActionLink("Все администраторы", "GetAllAdminUsersView", "UsersCompany", null,
+                   new
+                   {
+                       @class = "viewDialog",
+                       data_dialog_title = "Список всех администраторов",
+                       data_dialog_up = "true",
+                       title = "Список всех администраторов"
+                   })
+</div>
 
 <div class="text-center">
     @if (ViewBag.Page != 1 || ViewBag.SortByname != null || ViewBag.SortBycountry != null || ViewBag.IncludesAdmins != false ||
@@ -107,9 +117,6 @@ else
 
         $(document).ready(function () {
             $.extend(true, $.jgrid.edit, {
-                //beforeInitData: function () {
-                //    $("#editmodjqgEndUser" + this.id).remove();
-                //},
                 onInitializeForm: function ($form) {
                     $form.css({ height: "auto", width: "auto" });
                     $form.closest(".ui-jqdialog").css({ height: "auto", width: "auto" });
@@ -132,6 +139,20 @@ else
                 return [false, message];
             };
 
+            function checkLoginAdminUser(idCurrent) {
+                var message = "";
+                var mydata = $("#jqgAdminUser").jqGrid('getGridParam', 'data');
+                for (var i in mydata) {
+                    if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
+                        message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
+                        break;
+                    }
+                }
+                if (message === "")
+                    return [true];
+                return [false, message];
+            };
+
             $.datepicker.setDefaults($.datepicker.regional['ru']);
 
             var datemin = new Date(1940, 0, 1);
@@ -139,6 +160,33 @@ else
             var date = new Date();
             var datemax = new Date(date.getFullYear() - 18, 11, 31);
 
+///dialog////////////////////////////////////////
+            $.ajaxSetup({ cache: false });
+
+            $(".viewDialog").on("click", function (e) {
+                e.preventDefault();
+
+                $("<div></div>")
+        .addClass("dialog")
+       // .appendTo("table")
+        .dialog({
+            title: $(this).attr("data-dialog-title"),
+            textup: $(this).attr("data-dialog-up"),
+            close: function () { $(this).remove() },
+            modal: true,
+            draggable: false,
+            closeOnEscape: false,
+            open: function () {
+                if ($(this).dialog("option", "textup") === "true") {
+                    window.scroll(0, 0);
+                    $(this).dialog("option", "position", { my: "top", at: "top", of: window });
+                    $(this).dialog("option", "width", $('body').innerWidth());
+                }
+            }
+        })
+        .load(this.href);
+            });
+/////////////////////////////////////////////////
             $("#jqgEndUser").jqGrid({
                 url: '@Url.Action("GetEndUsersCompany", "UsersCompany", new { IdCompany = Model.ID })',
                 //editurl: 'clientArray', ////////////////////////////////////
@@ -336,20 +384,17 @@ else
                                    resize: false,
 
                                    beforeSubmit: function () {
-                                       return checkLoginEndUser();
+                                       var idCurrent = $("#id_g").val();
+                                       return checkLoginAdminUser(idCurrent);
                                    },
 
                                    afterSubmit: function (response) {
                                        var data = JSON.parse(response.responseText);
                                        if (data.ID !== undefined) {
-                                           var mydataadd = [{
-                                               ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
-                                               IsActive: data.IsActive
-                                           }];
-
+                                           var date = new Date(Date.parse(data.DateOfBirth));
                                            $("#jqgAdminUser").setCell(data.ID, 'Login', data.Login);
                                            $("#jqgAdminUser").setCell(data.ID, 'Position', data.Position);
-                                           $("#jqgAdminUser").setCell(data.ID, 'DateOfBirth', data.DateOfBirth);
+                                           $("#jqgAdminUser").setCell(data.ID, 'DateOfBirth', date);
                                            $("#jqgAdminUser").setCell(data.ID, 'IsActive', data.IsActive);
 
                                            return [true];
@@ -357,28 +402,74 @@ else
                                        return [false, data];
                                    }
                                },
-{
+{ ////////////////////////////////////////////////////////////////////////////////////////////////////////////
     mtype: "POST",
-    url: '@Url.Action("CreateEndUsers", "UsersCompany", new { IdCompany = Model.ID })',
+    url: '@Url.Action("CreateAdminUsersInCompany", "UsersCompany", new { IdCompany = Model.ID })',
     resize: false,
     closeAfterAdd: true,
     recreateForm: true,
+    AddCaption: "Добавить запись(и)",
+    drag: false,
+    modal: true,
+    left: 1,
+    top: 1,
+
+    beforeShowForm: function () {
+        $("#editmodjqgAdminUser").width($('body').innerWidth() - 10);
+        $("#FrmGrid_jqgAdminUser").empty();
+        $("#FrmGrid_jqgAdminUser").append("<table id='tableUsersCompany'></table>");
+        $("#FrmGrid_jqgAdminUser").append("<div id='jpagerUsersCompany'></div>");
+        $("#tableUsersCompany").jqGrid({
+            url: '@Url.Action("GetAdminUsers", "UsersCompany", new { IdCompany = Model.ID })',
+            mtype: "GET",
+            datatype: "json",
+            colModel: [
+        { label: 'ID', name: 'ID', stype: 'text', key: true, hidden: true, editable: false },
+        { label: 'Логин', name: 'Login', sortable: true, editable: false },
+        { label: 'Должность', name: 'Position', sortable: true, editable: false },
+        { label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: false, width: 50 },
+        { label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: false, width: 50 }
+            ],
+            width: $('body').innerWidth() - 14,
+            loadonce: true,
+            caption: "Выберите администраторов для добавления к компании",
+            pager: '#jpagerUsersCompany',
+            multiselect: true,
+            rowNum: 10,
+            scroll: 1,
+            viewrecords: true,
+            emptyrecords: 'Таблица пуста'
+        });
+        $("#tableUsersCompany_cb").empty();
+        window.scroll(0,0);
+    },
+    
+    onclickSubmit: function () {
+        var data = $("#tableUsersCompany").jqGrid('getGridParam', 'selarrrow');
+        return { ID: JSON.stringify(data) };        
+    },
 
     beforeSubmit: function () {
-        return checkLoginEndUser();
+        var data = $("#tableUsersCompany").jqGrid('getGridParam', 'selrow');
+        if (data === null) {
+            $("#jpagerUsersCompany_left").addClass("text-danger");
+            $("#jpagerUsersCompany_left").html("<b>Выберите хотя бы одну запись или нажмите \"Отмена\"</b>");
+            return [false];
+        }
+        return [true];
     },
 
     afterSubmit: function (response) {
-        var data = JSON.parse(response.responseText);
-        if (data.ID !== undefined) {
-            var mydataadd = [{
-                ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
-                IsManager: data.IsManager
-            }];
-            $("#jqgEndUser").addRowData("ID", mydataadd);
-            return [true];
+        $("#cData").click();
+
+        if (response.responseText === "") {
+            alert("Произошла ошибка. Обновите страницу");
+            return [false];
         }
-        return [false, data];
+
+        var data = JSON.parse(response.responseText);
+        $("#jqgAdminUser").addRowData("ID", data);
+        return [true];
     }
 },
 {
@@ -397,6 +488,6 @@ else
 }
 );
 
-        });//(document).ready
+        });
     </script>
 }

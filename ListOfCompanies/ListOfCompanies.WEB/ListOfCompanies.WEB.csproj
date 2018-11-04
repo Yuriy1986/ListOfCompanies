@@ -362,6 +362,7 @@
     <Content Include="Views\Home\_DeleteCompanyPartial.cshtml" />
     <Content Include="Views\Home\CompanyView.cshtml" />
     <Content Include="Views\UsersCompany\_GetUsersCompanyPartial.cshtml" />
+    <Content Include="Views\UsersCompany\_GetAllAdminUsersPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

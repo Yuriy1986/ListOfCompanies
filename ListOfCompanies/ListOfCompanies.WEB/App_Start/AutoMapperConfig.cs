@@ -3,6 +3,7 @@ using AutoMapper;
 using ListOfCompanies.BLL.DTO;
 using ListOfCompanies.DAL.Entities;
 using ListOfCompanies.WEB.Models;
+using System.Linq;
 
 namespace ListOfCompanies.WEB.App_Start
 {
@@ -23,8 +24,10 @@ namespace ListOfCompanies.WEB.App_Start
                     // UserCompanyService / GetEndUsersCompany.
                     cfg.CreateMap<EndUser, DTOEndUserViewModel>();
 
-                    // UserCompanyService / GetAdminUsersCompany.
-                    cfg.CreateMap<AdminUser, DTOAdminUserViewModel>();
+                    // UserCompanyService / GetAdminUsersCompany, GetAdminUsers, CreateAdminUsersInCompany, GetAllAdminUsers.
+                    cfg.CreateMap<AdminUser, DTOAdminUserViewModel>()
+                        .ForMember(destination => destination.NamesCompanies, opt => opt.MapFrom(src => src.Companies.Select(x => x.Name)))
+                        .ForMember(destination => destination.CountriesCompanies, opt => opt.MapFrom(src => src.Companies.Select(x => x.Country)));
 
                     // UserCompanyService / CreateEndUser, EditEndUsers.
                     cfg.CreateMap<DTOEndUserViewModel, EndUser>();
@@ -59,7 +62,7 @@ namespace ListOfCompanies.WEB.App_Start
                     // UsersCompany / GetEndUsersCompany, CreateEndUsers, EditEndUsers
                     cfg.CreateMap<DTOEndUserViewModel, EndUserViewModel>();
 
-                    // UsersCompany / GetAdminUsersCompany, EditAdminUsers
+                    // UsersCompany / GetAdminUsersCompany, EditAdminUsers, GetAdminUsers, GetAllAdminUsers
                     cfg.CreateMap<DTOAdminUserViewModel, AdminUserViewModel>();
 
                

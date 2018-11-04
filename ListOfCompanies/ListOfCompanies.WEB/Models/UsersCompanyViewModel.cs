@@ -18,6 +18,10 @@ namespace ListOfCompanies.WEB.Models
     {
         [Display(Name = "Активный ")]
         public bool IsActive { get; set; }
+
+        public List<string> NamesCompanies { get; set; }
+
+        public List<string> CountriesCompanies { get; set; }
     }
 
     public class UserViewModel

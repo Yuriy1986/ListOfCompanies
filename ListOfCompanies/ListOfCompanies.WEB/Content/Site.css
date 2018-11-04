@@ -28,3 +28,7 @@ textarea {
 {
     visibility:hidden;
 }
+
+.ui-jqgrid-bdiv{
+    min-height:220px;
+}

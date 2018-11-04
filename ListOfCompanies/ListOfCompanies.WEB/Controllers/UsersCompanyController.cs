@@ -45,6 +45,15 @@ namespace ListOfCompanies.WEB.Controllers
             return JsonConvert.SerializeObject(adminUsersCompany);
         }
 
+        // Get all adminUsers becides current company.
+        [Authorize]
+        [HttpGet]
+        public string GetAdminUsers(Guid IdCompany)
+        {
+            var adminUsers = Mapper.Map<IEnumerable<DTOAdminUserViewModel>, IEnumerable<AdminUserViewModel>>(UserCompanyService.GetAdminUsers(IdCompany));
+            return JsonConvert.SerializeObject(adminUsers);
+        }
+
         [Authorize]
         [HttpPost]
         public string EditEndUsers(EndUserViewModel model)
@@ -131,5 +140,37 @@ namespace ListOfCompanies.WEB.Controllers
             return ErrorsUsers(ModelState);
         }
 
+
+        [Authorize]
+        [HttpPost]
+        public string CreateAdminUsersInCompany(string id, Guid IdCompany)
+        {
+            if (id != null)
+            {
+                Guid[] idUsers = JsonConvert.DeserializeObject<Guid[]>(id);
+                var newAdminUsersInCompany = UserCompanyService.CreateAdminUsersInCompany(idUsers, IdCompany);
+                if (newAdminUsersInCompany != null)
+                {
+                    return JsonConvert.SerializeObject(newAdminUsersInCompany);
+                }
+            }
+            return null;
+        }
+
+        // _GetAllAdminUsersPartial.
+        [Authorize]
+        [HttpGet]
+        public ActionResult GetAllAdminUsersView()
+        {
+            return PartialView("_GetAllAdminUsersPartial");
+        }
+
+        [Authorize]
+        [HttpGet]
+        public string GetAllAdminUsers()
+        {
+            var adminUsersAll = Mapper.Map<IEnumerable<DTOAdminUserViewModel>, IEnumerable<AdminUserViewModel>>(UserCompanyService.GetAllAdminUsers());
+            return JsonConvert.SerializeObject(adminUsersAll);
+        }
     }
 }

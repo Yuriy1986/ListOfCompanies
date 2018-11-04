@@ -13,6 +13,9 @@ namespace ListOfCompanies.BLL.Interfaces
 
         IEnumerable<DTOAdminUserViewModel> GetAdminUsersCompany(Guid IdCompany);
 
+        // Get all adminUsers becides current company.
+        IEnumerable<DTOAdminUserViewModel> GetAdminUsers(Guid IdCompany);
+
         bool DeleteEndUser(Guid ID);
 
         bool CreateEndUser(DTOEndUserViewModel model, Guid IdCompany, out string parametr);
@@ -23,6 +26,9 @@ namespace ListOfCompanies.BLL.Interfaces
 
         bool EditAdminUser(DTOAdminUserViewModel model, out string parametr);
 
+        IEnumerable<DTOAdminUserViewModel> CreateAdminUsersInCompany(Guid[] idUsers, Guid IdCompany);
 
+        // _GetAllAdminUsersPartial.
+        IEnumerable<DTOAdminUserViewModel> GetAllAdminUsers();
     }
 }
