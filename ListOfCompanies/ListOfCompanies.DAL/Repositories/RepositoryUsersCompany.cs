@@ -174,9 +174,38 @@ namespace ListOfCompanies.DAL.Repositories
         }
 
         // _GetAllAdminUsersPartial.
-        public IEnumerable<AdminUser> GetAllAdminUsers()
+        public IEnumerable<AdminUser> GetAllAdminUsersDetails()
         {
             return db.AdminUsers.Include(x=>x.Companies);
+        }
+
+        public bool CreateAdminUser(AdminUser adminuser, out string parametr)
+        {
+            AdminUser adminuserCurrent = db.AdminUsers.FirstOrDefault(x => x.Login == adminuser.Login);
+            if (adminuserCurrent == null)
+            {
+                adminuser.ID = Guid.NewGuid();
+                db.AdminUsers.Add(adminuser);
+                db.Entry(adminuser).State = EntityState.Added;
+                db.SaveChanges();
+                parametr = adminuser.ID.ToString();
+                return true;
+            }
+            parametr = "Пользователь с таким логином уже зарегисрирован";
+            return false;
+        }
+
+        public bool DeleteAdminUser(Guid ID)
+        {
+            AdminUser adminuserCurrent = db.AdminUsers.FirstOrDefault(x => x.ID == ID);
+            if (adminuserCurrent != null)
+            {
+                db.AdminUsers.Remove(adminuserCurrent);
+                db.Entry(adminuserCurrent).State = EntityState.Deleted;
+                db.SaveChanges();
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -71,9 +71,20 @@ namespace ListOfCompanies.BLL.Services
         }
 
         // _GetAllAdminUsersPartial.
-        public IEnumerable<DTOAdminUserViewModel> GetAllAdminUsers()
+        public IEnumerable<DTOAdminUserViewModel> GetAllAdminUsersDetails()
         {
-            return Mapper.Map<IEnumerable<AdminUser>, IEnumerable<DTOAdminUserViewModel>>(Database.UsersCompany.GetAllAdminUsers());
+            return Mapper.Map<IEnumerable<AdminUser>, IEnumerable<DTOAdminUserViewModel>>(Database.UsersCompany.GetAllAdminUsersDetails());
+        }
+
+        public bool CreateAdminUser(DTOAdminUserViewModel model, out string parametr)
+        {
+            var adminuser = Mapper.Map<AdminUser>(model);
+            return Database.UsersCompany.CreateAdminUser(adminuser, out parametr);
+        }
+
+        public bool DeleteAdminUser(Guid ID)
+        {
+            return Database.UsersCompany.DeleteAdminUser(ID);
         }
 
         public void Dispose()

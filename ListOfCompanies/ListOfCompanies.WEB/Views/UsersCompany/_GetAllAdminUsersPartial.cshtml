@@ -1,5 +1,6 @@
-﻿<table id="jqgAdminUser"></table>
-<div id="jpagerA"></div>
+﻿<table id="jqgAllAdminUser"></table>
+<div id="jpagerAllAdminUser"></div>
+
 
 <hr />
 
@@ -8,38 +9,30 @@
 </p>
 
 <script type="text/javascript">
+
+
     $(document).ready(function () {
-        $.extend(true, $.jgrid.edit, {
-            onInitializeForm: function ($form) {
-                $form.css({ height: "auto", width: "auto" });
-                $form.closest(".ui-jqdialog").css({ height: "auto", width: "auto" });
-            },
-            width: "auto"
-        });
-
-        function checkLoginAdminUser(idCurrent) {
-            var message = "";
-            var mydata = $("#jqgAdminUser").jqGrid('getGridParam', 'data');
-            for (var i in mydata) {
-                if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
-                    message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
-                    break;
-                }
-            }
-            if (message === "")
-                return [true];
-            return [false, message];
-        };
-
-        $.datepicker.setDefaults($.datepicker.regional['ru']);
+        //function checkLoginAdminUser(idCurrent) {
+        //    var message = "";
+        //    var mydata = $("#jqgAllAdminUser").jqGrid('getGridParam', 'data');
+        //    for (var i in mydata) {
+        //        if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
+        //            message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
+        //            break;
+        //        }
+        //    }
+        //    if (message === "")
+        //        return [true];
+        //    return [false, message];
+        //};
 
         var datemin = new Date(1940, 0, 1);
 
         var date = new Date();
         var datemax = new Date(date.getFullYear() - 18, 11, 31);
 
-        $("#jqgAdminUser").jqGrid({
-            url: '@Url.Action("GetAllAdminUsers", "UsersCompany")',
+        $("#jqgAllAdminUser").jqGrid({
+            url: '@Url.Action("GetAllAdminUsersDetails", "UsersCompany")',
             mtype: "GET",
             datatype: "json",
             colModel: [
@@ -77,10 +70,12 @@
         {
             label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50,
             editoptions: { value: "True:False" }
-        }
+        },
+        { label: 'Компания', name: 'NamesCompanies', edittype: 'text', editable: false, width: 50, sortable: false },
+        { label: 'Страна', name: 'CountriesCompanies', edittype: 'text', editable: false, width: 50, sortable: false },
             ],
-            width: $('body').innerWidth() - 32,
-            pager: '#jpagerA',
+            width: $('body').innerWidth() - 35,
+            pager: '#jpagerAllAdminUser',
             loadonce: true,
             caption: "Администраторы",
             rowNum: 10,
@@ -88,6 +83,98 @@
             viewrecords: true,
             emptyrecords: 'Таблица пуста'
         });
+        $("#jqgAllAdminUser").jqGrid('navGrid', '#jpagerAllAdminUser', {
+            add: true,
+            del: true,
+            edit: true,
+            search: true,
+            refresh: true,
+        },
+                              {
+                                  viewPagerButtons: false,
+                                  mtype: "POST",
+                                  url: '@Url.Action("EditAdminUsers", "UsersCompany")',
+                                  closeAfterEdit: true,
+                                  recreateForm: true,
+                                  resize: false,
 
+                                  //beforeInitData: function (formid) {
+                                  //    $("#jqgAllAdminUser").jqGrid('setColProp', 'Login', { editable: true });
+                                  //},
+                                  //beforeShowForm: function(form) {
+                                  //  //  $('#Login', form).attr("disabled", false);
+                                  //    //  $("#Login").removeAttr('read-only');
+                                  //    $('#Login').prop("readonly", false);
+                                  //    //$("#jqgAllAdminUser").jqGrid('setColProp', 'Login', { editable: true });
+                                  //},
+
+
+                                  beforeSubmit: function () {
+                                      // var idCurrent = $("#id_g").val();
+                                      // return checkLoginAdminUser(idCurrent);
+                                      return [true];
+                                  },
+
+                                  afterSubmit: function (response) {
+                                      var data = JSON.parse(response.responseText);
+                                      if (data.ID !== undefined) {
+                                          var date = new Date(Date.parse(data.DateOfBirth));
+                                          $("#jqgAllAdminUser").setCell(data.ID, 'Login', data.Login);
+                                          $("#jqgAllAdminUser").setCell(data.ID, 'Position', data.Position);
+                                          $("#jqgAllAdminUser").setCell(data.ID, 'DateOfBirth', date);
+                                          $("#jqgAllAdminUser").setCell(data.ID, 'IsActive', data.IsActive);
+
+                                          return [true];
+                                      }
+                                      return [false, data];
+                                  }
+                              },
+
+                                      {
+                                          mtype: "POST",
+                                          url: '@Url.Action("CreateAdminUsers", "UsersCompany")',
+                                          resize: false,
+                                          closeAfterAdd: true,
+                                          recreateForm: true,
+
+                                          //beforeSubmit: function () {
+                                          //    return checkLoginEndUser();
+                                          //},
+
+                                          afterSubmit: function (response) {
+                                              var data = JSON.parse(response.responseText);
+                                              if (data.ID !== undefined) {
+                                                  var mydataadd = [{
+                                                      ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
+                                                      IsActive: data.IsActive
+                                                  }];
+                                                  $("#jqgAllAdminUser").addRowData("ID", mydataadd);
+                                                  return [true];
+                                              }
+                                              return [false, data];
+                                          }
+                                      },
+                                              {
+                                                  mtype: "POST",
+                                                  url: '@Url.Action("DeleteAdminUsers", "UsersCompany")',
+                                                  closeAfterDelete: true,
+                                                  recreateForm: true,
+                                                  resize: false,
+                                                  msg: "Вы хотите удалить этого пользователя? ",
+
+                                                  beforeSubmit: function (response) {
+                                                      var mydata = $("#jqgAllAdminUser").jqGrid('getGridParam', 'selrow');
+                                                      alert(mydata.Position);
+                                                      return [false, "hhhh"];
+                                                  },
+
+                                                  afterSubmit: function (response) {
+                                                      if (response === "False")
+                                                          return [false, "Произошла ошибка. Обновите страницу"];
+                                                      return [true];
+                                                  }
+                                              }
+
+        );
     });
 </script>

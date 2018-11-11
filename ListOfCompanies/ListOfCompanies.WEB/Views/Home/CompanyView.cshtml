@@ -106,6 +106,7 @@ else
 
     <script type="text/javascript">
 
+
         function submitFormCompany() {
             if ($("#idCompanyName").val() === '@Model.Name' && $("#idCompanyCountry").val() === '@Model.Country') {
                 $("#idValidationForm").empty();
@@ -173,7 +174,8 @@ else
             title: $(this).attr("data-dialog-title"),
             textup: $(this).attr("data-dialog-up"),
             close: function () { $(this).remove() },
-            modal: true,
+            closeText:"Закрыть",
+          //  modal: true,/////////////////////////
             draggable: false,
             closeOnEscape: false,
             open: function () {

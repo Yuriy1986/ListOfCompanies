@@ -29,6 +29,10 @@ namespace ListOfCompanies.DAL.Interfaces
         IEnumerable<AdminUser> CreateAdminUsersInCompany(Guid[] idUsers, Guid IdCompany);
 
         // _GetAllAdminUsersPartial.
-        IEnumerable<AdminUser> GetAllAdminUsers();
+        IEnumerable<AdminUser> GetAllAdminUsersDetails();
+
+        bool CreateAdminUser(AdminUser adminuser, out string parametr);
+
+        bool DeleteAdminUser(Guid ID);
     }
 }

@@ -156,7 +156,7 @@ namespace ListOfCompanies.WEB.Controllers
             }
             return null;
         }
-
+// ////////////////////////////////////////////////////////////////////////////////////////////////
         // _GetAllAdminUsersPartial.
         [Authorize]
         [HttpGet]
@@ -167,10 +167,53 @@ namespace ListOfCompanies.WEB.Controllers
 
         [Authorize]
         [HttpGet]
-        public string GetAllAdminUsers()
+        public string GetAllAdminUsersDetails()
         {
-            var adminUsersAll = Mapper.Map<IEnumerable<DTOAdminUserViewModel>, IEnumerable<AdminUserViewModel>>(UserCompanyService.GetAllAdminUsers());
-            return JsonConvert.SerializeObject(adminUsersAll);
+            var adminUsersAll = Mapper.Map<IEnumerable<DTOAdminUserViewModel>, IEnumerable<AdminUserViewModel>>(UserCompanyService.GetAllAdminUsersDetails());
+
+            foreach (var item in adminUsersAll)
+            {
+                if (item.CountriesCompanies.Count > 1)
+                {
+                    for (int i = 1; i < item.CountriesCompanies.Count; i++)
+                    {
+                        item.CountriesCompanies[0] +=",\n" + item.CountriesCompanies[i];
+                        item.NamesCompanies[0] += ",\n" + item.NamesCompanies[i];
+                    }
+                    item.CountriesCompanies.RemoveRange(1, item.CountriesCompanies.Count - 1);
+                    item.NamesCompanies.RemoveRange(1, item.NamesCompanies.Count - 1);
+                }
+            }
+                return JsonConvert.SerializeObject(adminUsersAll);
         }
+
+        [Authorize]
+        [HttpPost]
+        public string CreateAdminUsers([Bind(Exclude = "ID")] AdminUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.Login = model.Login.Trim();
+                model.Position = model.Position.Trim();
+                var adminUserViewModelDto = Mapper.Map<DTOAdminUserViewModel>(model);
+                string parametr;
+
+                if (UserCompanyService.CreateAdminUser(adminUserViewModelDto, out parametr))
+                {
+                    model.ID = Guid.Parse(parametr);
+                    return JsonConvert.SerializeObject(model);
+                }
+                return JsonConvert.SerializeObject(parametr);
+            }
+            return ErrorsUsers(ModelState);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public bool DeleteAdminUsers(Guid ID)
+        {
+            return UserCompanyService.DeleteAdminUser(ID);
+        }
+
     }
 }

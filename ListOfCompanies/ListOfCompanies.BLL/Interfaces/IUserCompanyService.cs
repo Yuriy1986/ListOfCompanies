@@ -29,6 +29,11 @@ namespace ListOfCompanies.BLL.Interfaces
         IEnumerable<DTOAdminUserViewModel> CreateAdminUsersInCompany(Guid[] idUsers, Guid IdCompany);
 
         // _GetAllAdminUsersPartial.
-        IEnumerable<DTOAdminUserViewModel> GetAllAdminUsers();
+        IEnumerable<DTOAdminUserViewModel> GetAllAdminUsersDetails();
+
+        bool CreateAdminUser(DTOAdminUserViewModel model, out string parametr);
+
+        bool DeleteAdminUser(Guid ID);
+
     }
 }
