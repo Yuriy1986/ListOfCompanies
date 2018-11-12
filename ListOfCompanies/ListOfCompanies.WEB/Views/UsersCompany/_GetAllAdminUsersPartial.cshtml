@@ -12,19 +12,19 @@
 
 
     $(document).ready(function () {
-        //function checkLoginAdminUser(idCurrent) {
-        //    var message = "";
-        //    var mydata = $("#jqgAllAdminUser").jqGrid('getGridParam', 'data');
-        //    for (var i in mydata) {
-        //        if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
-        //            message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
-        //            break;
-        //        }
-        //    }
-        //    if (message === "")
-        //        return [true];
-        //    return [false, message];
-        //};
+        function checkLoginAdminUser(idCurrent) {
+            var message = "";
+            var mydata = $("#jqgAllAdminUser").jqGrid('getGridParam', 'data');
+            for (var i in mydata) {
+                if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
+                    message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
+                    break;
+                }
+            }
+            if (message === "")
+                return [true];
+            return [false, message];
+        };
 
         var datemin = new Date(1940, 0, 1);
 
@@ -98,20 +98,9 @@
                                   recreateForm: true,
                                   resize: false,
 
-                                  //beforeInitData: function (formid) {
-                                  //    $("#jqgAllAdminUser").jqGrid('setColProp', 'Login', { editable: true });
-                                  //},
-                                  //beforeShowForm: function(form) {
-                                  //  //  $('#Login', form).attr("disabled", false);
-                                  //    //  $("#Login").removeAttr('read-only');
-                                  //    $('#Login').prop("readonly", false);
-                                  //    //$("#jqgAllAdminUser").jqGrid('setColProp', 'Login', { editable: true });
-                                  //},
-
-
                                   beforeSubmit: function () {
-                                      // var idCurrent = $("#id_g").val();
-                                      // return checkLoginAdminUser(idCurrent);
+                                      var idCurrent = $("#id_g").val();
+                                      return checkLoginAdminUser(idCurrent);
                                       return [true];
                                   },
 
@@ -137,18 +126,14 @@
                                           closeAfterAdd: true,
                                           recreateForm: true,
 
-                                          //beforeSubmit: function () {
-                                          //    return checkLoginEndUser();
-                                          //},
+                                          beforeSubmit: function () {
+                                              return checkLoginAdminUser();
+                                          },
 
                                           afterSubmit: function (response) {
                                               var data = JSON.parse(response.responseText);
                                               if (data.ID !== undefined) {
-                                                  var mydataadd = [{
-                                                      ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
-                                                      IsActive: data.IsActive
-                                                  }];
-                                                  $("#jqgAllAdminUser").addRowData("ID", mydataadd);
+                                                  $("#jqgAllAdminUser").addRowData("ID", data);
                                                   return [true];
                                               }
                                               return [false, data];
@@ -163,9 +148,18 @@
                                                   msg: "Вы хотите удалить этого пользователя? ",
 
                                                   beforeSubmit: function (response) {
-                                                      var mydata = $("#jqgAllAdminUser").jqGrid('getGridParam', 'selrow');
-                                                      alert(mydata.Position);
-                                                      return [false, "hhhh"];
+                                                      var dataId = $("#jqgAllAdminUser").jqGrid('getGridParam', 'selrow');
+                                                      var mydata = $("#jqgAllAdminUser").jqGrid('getRowData', dataId);
+                                                      if (mydata.NamesCompanies === "")
+                                                          return [true];
+                                                      else
+                                                      {
+                                                          var responce = confirm("Пользователь удалится из следующих компаний: \n" + mydata.NamesCompanies);
+                                                          if (responce)
+                                                              return [true];
+                                                          $("#eData").click();
+                                                          return [false];
+                                                      }
                                                   },
 
                                                   afterSubmit: function (response) {
