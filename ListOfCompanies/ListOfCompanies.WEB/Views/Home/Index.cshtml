@@ -57,7 +57,7 @@
             <div class="text-center">
                 <br />
                 <input type="submit" class="btn btn-primary" value="Добавить компанию" formmethod="post"
-                       formaction="@Url.Action("CreateCompany","Home",new { Page = @ViewBag.page })"  />
+                       formaction="@Url.Action("CreateCompany","Home",new { Page = @ViewBag.page })" />
             </div>
         }
 
@@ -93,8 +93,7 @@
                         </td>
                         <td>
                             <button class="glyphicon glyphicon-pencil btn btn-default" title="Редактировать компанию" type="submit" formmethod="post"
-                                   formaction="@Url.Action("EditCompany","Home",new { Page = @ViewBag.page, IdCompany = item.ID })" >
-                            </button>
+                                    formaction="@Url.Action("EditCompany","Home",new { Page = @ViewBag.page, IdCompany = item.ID })"></button>
                             |
 
                             @Html.ActionLink(" ", "DeleteCompany",
@@ -115,19 +114,53 @@
         @if (ViewBag.totalPages > 1)
         {
             <div class="pager">
-                <h6>Страница @ViewBag.page из @ViewBag.totalPages</h6>
                 @for (int i = 1; i <= (int)ViewBag.totalPages; i++)
                 {
-                    if (i == ViewBag.page)
+                    if (i == 1 && i != ViewBag.page)
                     {
-                        <input type="submit" class="btn btn-primary" value="@i" formaction="@Url.Action("Index","Home",new { Page = i })" formmethod="post" />
+                        <input type="submit" class="btn btn-default" value="@i" formaction="@Url.Action("Index","Home",new { Page = i })" formmethod="post" />
                         continue;
                     }
-                    <input type="submit" class="btn btn-default" value="@i" formaction="@Url.Action("Index","Home",new { Page = i })" formmethod="post" />
+
+                    if (i == ViewBag.page)
+                    {
+                        if (i - 3 > 1)
+                        {
+                            <input type="submit" class="btn btn-default" value="..." formaction="@Url.Action("Index","Home",new { Page = i-3 })" formmethod="post" />
+                        }
+                        if (i - 2 > 1)
+                        {
+                            <input type="submit" class="btn btn-default" value="@(i-2)" formaction="@Url.Action("Index","Home",new { Page = i-2 })" formmethod="post" />
+                        }
+                        if (i - 1 > 1)
+                        {
+                            <input type="submit" class="btn btn-default" value="@(i-1)" formaction="@Url.Action("Index","Home",new { Page = i-1 })" formmethod="post" />
+                        }
+
+                        <input type="submit" class="btn btn-primary" value="@i" formaction="@Url.Action("Index","Home",new { Page = i })" formmethod="post" />
+
+                        if (i + 1 < (int)ViewBag.totalPages)
+                        {
+                            <input type="submit" class="btn btn-default" value="@(i+1)" formaction="@Url.Action("Index","Home",new { Page = i+1 })" formmethod="post" />
+                        }
+                        if (i + 2 < (int)ViewBag.totalPages)
+                        {
+                            <input type="submit" class="btn btn-default" value="@(i+2)" formaction="@Url.Action("Index","Home",new { Page = i+2 })" formmethod="post" />
+                        }
+                        if (i + 3 < (int)ViewBag.totalPages)
+                        {
+                            <input type="submit" class="btn btn-default" value="..." formaction="@Url.Action("Index","Home",new { Page = i+3 })" formmethod="post" />
+                        }
+                        continue;
+                    }
+
+                    if (i == (int)ViewBag.totalPages && i != ViewBag.page)
+                    {
+                        <input type="submit" class="btn btn-default" value="@i" formaction="@Url.Action("Index","Home",new { Page = i })" formmethod="post" />
+                    }
                 }
             </div>
         }
-
     </div>
 }
 
@@ -145,13 +178,13 @@
             location.href = '@Url.Action("Index", "Home")';
         };
 
-          $("#idsortByname, #idsortBycountry, #idincludesAdmins, #idsearchByName")
-            .on("change", function () {
-                if ($("#idincludesAdmins").prop('checked') || $("#idsortByname").val() || $("#idsortBycountry").val() || $("#idsearchByName").val().trim()!="")
-                    $("#idFilter, #idClear").css("visibility", "visible");
-                else
-                    $("#idFilter, #idClear").css("visibility", "hidden");
-            });
+        $("#idsortByname, #idsortBycountry, #idincludesAdmins, #idsearchByName")
+          .on("change", function () {
+              if ($("#idincludesAdmins").prop('checked') || $("#idsortByname").val() || $("#idsortBycountry").val() || $("#idsearchByName").val().trim() != "")
+                  $("#idFilter, #idClear").css("visibility", "visible");
+              else
+                  $("#idFilter, #idClear").css("visibility", "hidden");
+          });
 
 
         $(document).ready(function () {
@@ -176,13 +209,6 @@
             closeText: "Закрыть",
             modal: true,
             draggable: false,
-            //beforeClose: function () {
-            //    $("html").css("overflow", "scroll");
-            //},
-
-            //open: function () {
-            //    $("html").css("overflow", "hidden");
-            //},
             closeOnEscape: false,
             open: function () {
                 if ($(this).dialog("option", "textup") === "true") {

@@ -76,7 +76,6 @@ else
                    {
                        @class = "viewDialog",
                        data_dialog_title = "Список всех администраторов",
-                       data_dialog_up = "true",
                        title = "Список всех администраторов"
                    })
 </div>
@@ -128,7 +127,6 @@ else
             function checkLoginEndUser(idCurrent) {
                 var message = "";
                 var mydata = $("#jqgEndUser").jqGrid('getGridParam', 'data');
-                // var logins = $("#jqgEndUser").jqGrid('getCol', 'Login', false);
                 for (var i in mydata) {
                     if ($("#Login").val() === mydata[i].Login && idCurrent !== mydata[i].ID) {
                         message += "Пользователь с логином \"" + mydata[i].Login + "\" уже зарегистрирован";
@@ -169,21 +167,23 @@ else
 
                 $("<div></div>")
         .addClass("dialog")
-       // .appendTo("table")
         .dialog({
             title: $(this).attr("data-dialog-title"),
             textup: $(this).attr("data-dialog-up"),
             close: function () { $(this).remove() },
-            closeText:"Закрыть",
-          //  modal: true,/////////////////////////
+            closeText: "Закрыть",
             draggable: false,
             closeOnEscape: false,
+
+            beforeClose: function () {
+                $("html").css("overflow-y", "scroll");
+            },            
             open: function () {
-                if ($(this).dialog("option", "textup") === "true") {
                     window.scroll(0, 0);
                     $(this).dialog("option", "position", { my: "top", at: "top", of: window });
                     $(this).dialog("option", "width", $('body').innerWidth());
-                }
+                    $(this).dialog("option", "height", window.innerHeight);
+                    $("html").css("overflow-y", "hidden");
             }
         })
         .load(this.href);
@@ -191,7 +191,6 @@ else
 /////////////////////////////////////////////////
             $("#jqgEndUser").jqGrid({
                 url: '@Url.Action("GetEndUsersCompany", "UsersCompany", new { IdCompany = Model.ID })',
-                //editurl: 'clientArray', ////////////////////////////////////
                 mtype: "GET",
                 datatype: "json",
                 colModel: [
@@ -199,12 +198,12 @@ else
             {
                 label: 'Логин', name: 'Login', sortable: true, editable: true, edittype: 'text',
                 editoptions: { placeholder: "Введите логин" },
-                editrules: { required: true, email: true }// ////////////////////////////////////
+                editrules: { required: true, email: true }
             },
             {
                 label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
                 editoptions: { value: { "": "", "director": "director", "manager": "manager", "programmer": "programmer", "booker": "booker" } },
-                editrules: { required: true }// ///////////////////////////////////////
+                editrules: { required: true }
             },
             {
                 label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: true, width: 50, edittype: 'button',
@@ -243,13 +242,10 @@ else
 
             $("#jqgEndUser").jqGrid('navGrid', '#jpager', {
                 add: true,
-                // addtext:"Добавить",
                 del: true,
                 edit: true,
                 search: true,
-                //   searchtext: "Поиск",
                 refresh: true,
-                //   refreshtext: "Обновить"
             },
                    {
                        viewPagerButtons: false,
@@ -293,11 +289,7 @@ else
             afterSubmit: function (response) {
                 var data = JSON.parse(response.responseText);
                 if (data.ID !== undefined) {
-                    var mydataadd = [{
-                        ID: data.ID, Login: data.Login, Position: data.Position, DateOfBirth: data.DateOfBirth,
-                        IsManager: data.IsManager
-                    }];
-                    $("#jqgEndUser").addRowData("ID", mydataadd);
+                    $("#jqgEndUser").addRowData("ID", data);
                     return [true];
                 }
                 return [false, data];

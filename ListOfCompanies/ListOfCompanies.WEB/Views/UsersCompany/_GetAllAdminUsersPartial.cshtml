@@ -1,7 +1,5 @@
 ﻿<table id="jqgAllAdminUser"></table>
 <div id="jpagerAllAdminUser"></div>
-
-
 <hr />
 
 <p class="text-center">
@@ -9,7 +7,6 @@
 </p>
 
 <script type="text/javascript">
-
 
     $(document).ready(function () {
         function checkLoginAdminUser(idCurrent) {
@@ -40,12 +37,12 @@
         {
             label: 'Логин', name: 'Login', sortable: true, editable: true, edittype: 'text',
             editoptions: { placeholder: "Введите логин" },
-            editrules: { required: true, email: true }// ////////////////////////////////////
+            editrules: { required: true, email: true }
         },
         {
             label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
             editoptions: { value: { "": "", "director": "director", "manager": "manager", "programmer": "programmer", "booker": "booker" } },
-            editrules: { required: true }// ///////////////////////////////////////
+            editrules: { required: true }
         },
         {
             label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: true, width: 50, edittype: 'button',
@@ -74,11 +71,12 @@
         { label: 'Компания', name: 'NamesCompanies', edittype: 'text', editable: false, width: 50, sortable: false },
         { label: 'Страна', name: 'CountriesCompanies', edittype: 'text', editable: false, width: 50, sortable: false },
             ],
-            width: $('body').innerWidth() - 35,
+            width: $('body').innerWidth() - 50,
+            height: window.innerHeight - 250,
             pager: '#jpagerAllAdminUser',
             loadonce: true,
             caption: "Администраторы",
-            rowNum: 10,
+            rowNum: 20,
             scroll: 1,
             viewrecords: true,
             emptyrecords: 'Таблица пуста'

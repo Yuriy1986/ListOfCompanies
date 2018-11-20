@@ -41,7 +41,6 @@ namespace ListOfCompanies.WEB.Models
         [Display(Name = "День рождения")]
         [Required(ErrorMessage = "Поле \"День рождения\" должно быть заполнено")]
         [DataType(DataType.Date)]
-      // [Range(typeof(DateTime), "01/01/1940","01/01/2001",ErrorMessage = "Проверьте дату рождения (от 01/01/1940 до 01/01/2001)")]
         [DateRange]
         public DateTime DateOfBirth { get; set; }
     }

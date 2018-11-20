@@ -214,6 +214,12 @@ namespace ListOfCompanies.WEB.Controllers
         {
             return UserCompanyService.DeleteAdminUser(ID);
         }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        protected override void Dispose(bool disposing)
+        {
+            UserCompanyService.Dispose();
+            base.Dispose(disposing);
+        }
     }
 }
