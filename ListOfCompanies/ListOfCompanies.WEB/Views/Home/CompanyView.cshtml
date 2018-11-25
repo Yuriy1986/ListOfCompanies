@@ -62,6 +62,16 @@
     <hr />
     <table id="jqgAdminUser"></table>
     <div id="jpagerA"></div>
+
+    <div>
+        @Html.ActionLink("Все администраторы", "GetAllAdminUsersView", "UsersCompany", null,
+                   new
+                   {
+                       @class = "viewDialog",
+                       data_dialog_title = "Список всех администраторов",
+                       title = "Список всех администраторов"
+                   })
+    </div>
 }
 else
 {
@@ -69,16 +79,6 @@ else
         Для добавления пользователей необходимо создать компанию
     </h3>
 }
-@*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////*@
-<div>
-    @Html.ActionLink("Все администраторы", "GetAllAdminUsersView", "UsersCompany", null,
-                   new
-                   {
-                       @class = "viewDialog",
-                       data_dialog_title = "Список всех администраторов",
-                       title = "Список всех администраторов"
-                   })
-</div>
 
 <div class="text-center">
     @if (ViewBag.Page != 1 || ViewBag.SortByname != null || ViewBag.SortBycountry != null || ViewBag.IncludesAdmins != false ||
@@ -179,11 +179,11 @@ else
                 $("html").css("overflow-y", "scroll");
             },            
             open: function () {
-                    window.scroll(0, 0);
-                    $(this).dialog("option", "position", { my: "top", at: "top", of: window });
-                    $(this).dialog("option", "width", $('body').innerWidth());
-                    $(this).dialog("option", "height", window.innerHeight);
-                    $("html").css("overflow-y", "hidden");
+                window.scroll(0, 0);
+                $("html").css("overflow-y", "hidden");
+                $(this).dialog("option", "position", { my: "top", at: "top", of: window });
+                $(this).dialog("option", "width", $('body').innerWidth());
+                $(this).dialog("option", "height", window.innerHeight);
             }
         })
         .load(this.href);
@@ -226,7 +226,7 @@ else
                 editrules: { required: true, date: true }
             },
             {
-                label: 'Управляющий', name: 'IsManager', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50,
+                label: 'Управляющий', name: 'IsManager', formatter: 'checkbox', sortable: true, editable: true, search:false, edittype: 'checkbox', width: 50,
                 editoptions: { value: "True:False" }
             }
                 ],
@@ -320,12 +320,12 @@ else
             {
                 label: 'Логин', name: 'Login', sortable: true, editable: true, edittype: 'text',
                 editoptions: { placeholder: "Введите логин" },
-                editrules: { required: true, email: true }// ////////////////////////////////////
+                editrules: { required: true, email: true }
             },
             {
                 label: 'Должность', name: 'Position', sortable: true, editable: true, edittype: 'select',
                 editoptions: { value: { "": "", "director": "director", "manager": "manager", "programmer": "programmer", "booker": "booker" } },
-                editrules: { required: true }// ///////////////////////////////////////
+                editrules: { required: true }
             },
             {
                 label: 'День рождения', name: 'DateOfBirth', formatter: 'date', sortable: true, editable: true, width: 50, edittype: 'button',
@@ -348,7 +348,7 @@ else
                 editrules: { required: true, date: true }
             },
             {
-                label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50,
+                label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: true,search:false, edittype: 'checkbox', width: 50,
                 editoptions: { value: "True:False" }
             }
                 ],
@@ -425,19 +425,21 @@ else
         { label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: false, width: 50 }
             ],
             width: $('body').innerWidth() - 14,
+            height: '100%',
             loadonce: true,
             caption: "Выберите администраторов для добавления к компании",
             pager: '#jpagerUsersCompany',
             multiselect: true,
-            rowNum: 10,
-            scroll: 1,
+             rowNum: -1,
+            scroll: 0,
             viewrecords: true,
             emptyrecords: 'Таблица пуста'
         });
-        $("#tableUsersCompany_cb").empty();
+        $("#tableUsersCompany_cb, #jpagerUsersCompany_center").empty();
+        $(".ui-jqgrid, .ui-jqgrid-bdiv").css("overflow", "hidden");
         window.scroll(0,0);
     },
-    
+
     onclickSubmit: function () {
         var data = $("#tableUsersCompany").jqGrid('getGridParam', 'selarrrow');
         return { ID: JSON.stringify(data) };        
@@ -463,6 +465,7 @@ else
 
         var data = JSON.parse(response.responseText);
         $("#jqgAdminUser").addRowData("ID", data);
+        window.scroll(0, $('body').innerHeight());
         return [true];
     }
 },

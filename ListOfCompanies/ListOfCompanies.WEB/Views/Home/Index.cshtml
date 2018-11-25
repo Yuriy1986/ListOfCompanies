@@ -212,9 +212,13 @@
             closeOnEscape: false,
             open: function () {
                 if ($(this).dialog("option", "textup") === "true") {
+                    $("html").css("overflow-y", "scroll");
                     $(this).dialog("option", "position", { my: "top", at: "top+50", of: window });
                     $(this).dialog("option", "width", $('body').innerWidth());
                 }
+            },
+            beforeClose:function(){
+                $("html").css("overflow-y", "auto");
             }
         })
         .load(this.href);

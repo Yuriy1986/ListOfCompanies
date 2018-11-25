@@ -22,7 +22,6 @@ namespace ListOfCompanies.WEB.Controllers
         public ActionResult Index(PagingFilteringViewModel model)
         {
             // Companies on page.
-           // int pageSize = 2;
             int pageSize = 10;
 
             int page = model.Page;

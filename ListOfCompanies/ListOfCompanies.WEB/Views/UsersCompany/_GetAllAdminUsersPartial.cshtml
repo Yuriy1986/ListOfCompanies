@@ -65,18 +65,18 @@
             editrules: { required: true, date: true }
         },
         {
-            label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: true, edittype: 'checkbox', width: 50,
+            label: 'Активный', name: 'IsActive', formatter: 'checkbox', sortable: true, editable: true,search:false, edittype: 'checkbox', width: 50,
             editoptions: { value: "True:False" }
         },
         { label: 'Компания', name: 'NamesCompanies', edittype: 'text', editable: false, width: 50, sortable: false },
         { label: 'Страна', name: 'CountriesCompanies', edittype: 'text', editable: false, width: 50, sortable: false },
             ],
-            width: $('body').innerWidth() - 50,
+            width: $('body').innerWidth()-34,
             height: window.innerHeight - 250,
             pager: '#jpagerAllAdminUser',
             loadonce: true,
             caption: "Администраторы",
-            rowNum: 20,
+            rowNum: -1,
             scroll: 1,
             viewrecords: true,
             emptyrecords: 'Таблица пуста'
