@@ -311,6 +311,11 @@ else
         }
         );
             ///////////////////////////////////////////////////////////////////////////////////////////
+            var brouser = navigator.userAgent;
+            var err = 32;
+            if (brouser.search(/ rv:11\.0/i) > 0 || brouser.search(/ MSIE /i) > 0)
+                err = 50;
+
             $("#jqgAdminUser").jqGrid({
                 url: '@Url.Action("GetAdminUsersCompany", "UsersCompany", new { IdCompany = Model.ID })',
                 mtype: "GET",
@@ -352,7 +357,7 @@ else
                 editoptions: { value: "True:False" }
             }
                 ],
-                width: $('body').innerWidth() - 32,
+                width: $('body').innerWidth() - err,
                 pager: '#jpagerA',
                 loadonce: true,
                 caption: "Администраторы",
